@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2F6F62">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<title>Diário — Acompanhamento</title>
+<link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <div class="view active" id="view-hoje"></div>
+  <div class="view" id="view-diario"></div>
+  <div class="view" id="view-treino"></div>
+  <div class="view" id="view-exames"></div>
+  <div class="view" id="view-mais"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-view="hoje" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path></svg>
+    Hoje
+  </button>
+  <button class="nav-btn" data-view="diario" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"></polyline><polyline points="14 7 21 7 21 14"></polyline></svg>
+    Diário
+  </button>
+  <button class="nav-btn" data-view="treino" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11"></path><path d="M21 21l-1-1"></path><path d="M4 4l1 1"></path><path d="M3 7l4-4"></path><path d="M17 21l4-4"></path><path d="M15 5l2-2 4 4-2 2"></path><path d="M5 15l-2 2 4 4 2-2"></path></svg>
+    Treino
+  </button>
+  <button class="nav-btn" data-view="exames" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line><line x1="9" y1="16" x2="12" y2="16"></line></svg>
+    Exames
+  </button>
+  <button class="nav-btn" data-view="mais" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"></rect><rect x="13" y="4" width="7" height="7" rx="1.5"></rect><rect x="4" y="13" width="7" height="7" rx="1.5"></rect><rect x="13" y="13" width="7" height="7" rx="1.5"></rect></svg>
+    Mais
+  </button>
+</nav>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
