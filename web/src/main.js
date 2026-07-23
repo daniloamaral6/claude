@@ -8,18 +8,14 @@ const views = {
   mais: () => import('./views/mais/index.js')
 };
 
-const mounted = new Set();
-
 async function activate(view) {
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === `view-${view}`));
 
-  if (!mounted.has(view)) {
-    mounted.add(view);
-    const el = document.getElementById(`view-${view}`);
-    const mod = await views[view]();
-    await mod.mount(el);
-  }
+  // remonta a cada visita para refletir dados salvos em outras abas (peso, treino, exames)
+  const el = document.getElementById(`view-${view}`);
+  const mod = await views[view]();
+  await mod.mount(el);
 }
 
 document.querySelectorAll('.nav-btn').forEach((btn) => {
