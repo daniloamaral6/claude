@@ -5,6 +5,7 @@ const views = {
   diario: () => import('./views/diario/index.js'),
   treino: () => import('./views/treino/index.js'),
   exames: () => import('./views/exames/index.js'),
+  medicamentos: () => import('./views/medicamentos/index.js'),
   mais: () => import('./views/mais/index.js')
 };
 

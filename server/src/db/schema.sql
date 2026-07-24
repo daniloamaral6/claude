@@ -49,6 +49,27 @@ CREATE TABLE IF NOT EXISTS treino_forca (
 );
 CREATE INDEX IF NOT EXISTS idx_treino_forca_exercicio ON treino_forca(exercicio);
 
+CREATE TABLE IF NOT EXISTS medicamentos (
+  id              TEXT PRIMARY KEY,
+  nome            TEXT NOT NULL,
+  dose            TEXT,
+  via             TEXT NOT NULL,
+  frequencia      TEXT,
+  intervalo_dias  REAL,
+  notas           TEXT
+);
+
+CREATE TABLE IF NOT EXISTS aplicacoes_medicamento (
+  id                  TEXT PRIMARY KEY,
+  medicamento_id      TEXT NOT NULL REFERENCES medicamentos(id) ON DELETE CASCADE,
+  data                TEXT NOT NULL,
+  hora                TEXT,
+  local               TEXT,
+  efeitos_colaterais  TEXT,
+  obs                 TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_aplicacoes_medicamento_id ON aplicacoes_medicamento(medicamento_id);
+
 CREATE TABLE IF NOT EXISTS treino_cardio (
   id        TEXT PRIMARY KEY,
   data      TEXT NOT NULL,

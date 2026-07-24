@@ -51,6 +51,9 @@ automaticamente).
   evolução e histórico combinado
 - **Exames**: upload de PDF analisado por IA, exames de sangue (agrupados, com faixa de
   referência) e de imagem (conclusão extraída)
+- **Medicamentos**: cadastro de remédios (com sugestões pré-preenchidas para Mounjaro,
+  Losartana, Vitamina D3 e Pantogar Neo), registro de doses aplicadas (local, efeitos
+  colaterais) e cálculo automático da próxima dose para medicamentos com intervalo definido
 - **Hoje**: dashboard simples com peso atual e metas do dia (insights de IA ainda não
   implementados — depende dos módulos futuros)
 - **Mais**: grade com os próximos módulos do roadmap (ver `arquitetura_app_saude.md`
@@ -58,7 +61,7 @@ automaticamente).
 
 ## Próximos passos sugeridos
 
-Seguir a ordem de "bom senso" da arquitetura original: Medicamentos, Medidas corporais +
-Fotos de evolução, Sono/Humor/Sintomas, Hábitos/Objetivos/Conquistas, Timeline +
-Relatórios, Receitas + Lista de compras. Cada módulo novo ganha sua própria tabela em
+Seguir a ordem de "bom senso" da arquitetura original: Medidas corporais + Fotos de
+evolução, Sono/Humor/Sintomas, Hábitos/Objetivos/Conquistas, Timeline + Relatórios,
+Receitas + Lista de compras. Cada módulo novo ganha sua própria tabela em
 `server/src/db/schema.sql` e sua própria pasta em `web/src/views/`.

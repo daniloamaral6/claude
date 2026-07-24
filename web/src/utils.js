@@ -67,6 +67,21 @@ export function fileToBase64(file) {
   });
 }
 
+export function addDaysISO(iso, days) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + days);
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return `${dt.getFullYear()}-${mm}-${dd}`;
+}
+
+export function diffDaysISO(fromIso, toIso) {
+  const from = new Date(fromIso + 'T00:00:00');
+  const to = new Date(toIso + 'T00:00:00');
+  return Math.round((to - from) / 86400000);
+}
+
 export function uniqueSorted(list, key) {
   const set = {};
   list.forEach((e) => { if (e[key]) set[e[key]] = true; });

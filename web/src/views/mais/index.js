@@ -2,7 +2,7 @@ import { showToast } from '../../utils.js';
 import { maisTemplate } from './template.js';
 
 const FUTURE_MODULES = [
-  'Medicamentos', 'Medidas corporais', 'Fotos de evolução', 'Sono',
+  'Medidas corporais', 'Fotos de evolução', 'Sono',
   'Humor/Sintomas', 'Hábitos', 'Objetivos', 'Conquistas',
   'Timeline', 'Relatórios', 'Receitas', 'Lista de compras'
 ];
