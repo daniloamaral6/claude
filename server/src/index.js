@@ -7,6 +7,7 @@ import { db } from './db/client.js';
 import { diarioRouter } from './routes/diario.js';
 import { treinoRouter } from './routes/treino.js';
 import { examesRouter } from './routes/exames.js';
+import { medicamentosRouter } from './routes/medicamentos.js';
 import { aiRouter } from './routes/ai.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +21,7 @@ app.use(express.json({ limit: '15mb' }));
 app.use('/api/diario', diarioRouter);
 app.use('/api/treino', treinoRouter);
 app.use('/api/exames', examesRouter);
+app.use('/api/medicamentos', medicamentosRouter);
 app.use('/api/ai', aiRouter);
 
 const webDist = path.join(__dirname, '../../web/dist');

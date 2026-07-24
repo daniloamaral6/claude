@@ -36,6 +36,14 @@ export const api = {
     addImagem: (itens) => request('POST', '/api/exames/imagem', itens),
     deleteImagem: (id) => request('DELETE', `/api/exames/imagem/${id}`)
   },
+  medicamentos: {
+    list: () => request('GET', '/api/medicamentos'),
+    add: (medicamento) => request('POST', '/api/medicamentos', medicamento),
+    remove: (id) => request('DELETE', `/api/medicamentos/${id}`),
+    listAplicacoes: () => request('GET', '/api/medicamentos/aplicacoes'),
+    addAplicacao: (aplicacao) => request('POST', '/api/medicamentos/aplicacoes', aplicacao),
+    removeAplicacao: (id) => request('DELETE', `/api/medicamentos/aplicacoes/${id}`)
+  },
   ai: {
     analisarFoto: (base64, mediaType) => request('POST', '/api/ai/analisar-foto', { base64, mediaType }),
     analisarExame: (base64) => request('POST', '/api/ai/analisar-exame', { base64 })
