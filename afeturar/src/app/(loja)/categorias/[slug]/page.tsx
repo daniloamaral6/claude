@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { EmBreve } from "@/components/EmBreve";
+import { PrototipoAviso } from "@/components/PrototipoAviso";
 import { categorias } from "@/lib/site";
+import { CatalogoView } from "./CatalogoView";
 
 export function generateStaticParams() {
   return categorias.map((c) => ({ slug: c.slug }));
@@ -10,5 +11,10 @@ export default async function Categoria({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const cat = categorias.find((c) => c.slug === slug);
   if (!cat) notFound();
-  return <EmBreve titulo={cat.nome} texto="Os produtos desta categoria aparecerão aqui quando o catálogo for cadastrado." />;
+  return (
+    <>
+      <PrototipoAviso />
+      <CatalogoView categoriaSlug={cat.slug} categoriaNome={cat.nome} />
+    </>
+  );
 }

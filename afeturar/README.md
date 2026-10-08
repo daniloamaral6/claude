@@ -35,3 +35,18 @@ o arquivo não é modificado, e o recorte fica fora do anel do desenho.
 ## Pendências de arquivos
 Logo vetorial/PNG transparente, tipografia da marca, manual/paleta oficial, fotos reais, número de WhatsApp,
 dados da empresa (CNPJ, endereço, e-mail). Dados editáveis ficam em `src/lib/site.ts` (no MVP irão para o painel).
+
+## Etapa 2 — telas de protótipo (catálogo, produto, carrinho, checkout, admin)
+
+Rotas (já com a estrutura final): `/categorias/[slug]`, `/produtos/[slug]`, `/carrinho`, `/checkout`,
+`/admin`, `/admin/produtos`, `/admin/produtos/novo`, `/admin/pedidos`.
+
+- Todos os dados vêm de `src/lib/exemplo.ts` e são **ilustrativos** (nomes "Produto de exemplo N", preços
+  redondos, pedidos fictícios). Cada tela exibe o aviso "Protótipo de design". Não há fotos: os espaços
+  são reservados para fotografia real.
+- Interações de UI já funcionam (filtros, ordenação, variação de cor, quantidade, remoção, validação de
+  e-mail/CEP, cupom com erro). **Nada é persistido, enviado ou cobrado.**
+- Admin sem login. Autenticação, banco, pagamento (Mercado Pago), frete (Melhor Envio) e validação de
+  preços no servidor entram na Etapa 3/4.
+- Os mostruários de cor (preto, branco, marrom, bege caucasiano, verde oliva, verde menta, rosa bebê,
+  vermelho, azul, dourado, mármore) usam tons aproximados de interface, não cores reais de produto.
