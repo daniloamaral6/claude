@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — Afeturar
+ * Valores APROXIMADOS medidos no JPEG do logo (kit-afeturar/PALETA-EXTRAIDA.csv).
+ * Não são códigos oficiais da marca; substituir se houver paleta aprovada.
+ */
+@theme {
+  /* Medidas do logo */
+  --color-creme: #fdf6ee;
+  --color-marrom: #4a2712;
+  --color-terracota-escuro: #894128;
+  --color-terracota: #c1846f;
+  --color-cobre: #d89477;
+
+  /* Derivados (proposta nova, não vêm do kit) */
+  --color-creme-profundo: #f6e9db; /* seções alternadas */
+  --color-linha: #e6d3c2; /* bordas suaves */
+  --color-marrom-suave: #7a5a47; /* texto secundário (contraste ~5.6:1 sobre creme) */
+  --color-acao-hover: #6f3320; /* hover do botão principal */
+  --color-erro: #a3261c;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --radius-card: 12px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: var(--color-creme);
+  color: var(--color-marrom);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Foco visível e consistente para teclado */
+:focus-visible {
+  outline: 3px solid var(--color-terracota-escuro);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-medium tracking-wide transition-colors;
+  }
+  .btn-primary {
+    @apply bg-terracota-escuro text-creme hover:bg-acao-hover disabled:cursor-not-allowed disabled:bg-linha disabled:text-marrom-suave;
+  }
+  .btn-secondary {
+    @apply border border-marrom bg-creme text-marrom hover:bg-creme-profundo disabled:cursor-not-allowed disabled:border-linha disabled:text-marrom-suave;
+  }
+  .container-loja {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+  .campo {
+    @apply min-h-11 w-full rounded-lg border border-marrom-suave bg-white px-3 text-marrom placeholder:text-marrom-suave aria-[invalid=true]:border-erro;
+  }
+}
