@@ -7,3 +7,4 @@ tsconfig.tsbuildinfo
 src/generated
 storage
 scripts/_dev-*
+AGENTS.md
