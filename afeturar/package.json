@@ -13,12 +13,14 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "postinstall": "prisma generate",
-    "admin:criar": "tsx scripts/criar-admin.ts"
+    "admin:criar": "tsx scripts/criar-admin.ts",
+    "catalogo:importar": "tsx scripts/importar-catalogo.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "dotenv": "^18.0.6",
+    "exceljs": "^4.4.0",
     "next": "^16.4.0",
     "pg": "^8.23.1",
     "react": "^19.3.0",

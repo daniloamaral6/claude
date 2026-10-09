@@ -130,3 +130,16 @@ recuperação de senha ficam para depois; cancelar pedido ainda não devolve est
 
 **Testes:** `npm test` — 84 testes automatizados (regras do banco, login/sessão, produtos, fotos, pedidos, configurações, formulários).
 Os testes e2e do navegador foram executados manualmente com Playwright; capturas em `docs/painel/` (dados de teste, não reais).
+
+## Catálogo: planilha modelo e importador
+
+`docs/catalogo/modelo-catalogo-afeturar.xlsx` — modelo para preencher o catálogo (uma linha por variação), já com os **27 produtos extraídos do app
+"Afeturar — Gestão de produção"** (nome, categoria, preço sugerido e peso da peça). **Não** foram copiados custo, margem, filamento, impressora nem tempo
+de impressão (dados internos). Cores: amarelo = preencher · azul = sugestão para confirmar · cinza = referência do app (não importada).
+
+```
+npm run catalogo:importar -- planilha.xlsx                                        # simula e lista erros por linha (não grava)
+npm run catalogo:importar -- planilha.xlsx --fotos ./fotos --aplicar --admin voce@exemplo.com
+```
+Tudo entra como **rascunho**; publicar é um passo manual no painel. Idempotente (produto com o mesmo nome é ignorado), cores novas são criadas,
+SKU em branco é gerado (`AFT-0001…`), fotos são validadas como no painel. Código em `src/server/importacao*.ts`.
