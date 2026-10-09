@@ -22,3 +22,5 @@ export interface ProvedorPagamento {
   consultar(idExterno: string): Promise<ConsultaPagamento>;
 }
 export class ErroPagamento extends Error {}
+/** O provedor não conhece esse pagamento (ex.: notificação de teste). Não é erro: não adianta tentar de novo. */
+export class PagamentoNaoEncontrado extends ErroPagamento {}

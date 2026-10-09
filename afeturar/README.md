@@ -165,3 +165,32 @@ A loja pública agora lê do banco; o protótipo com dados de exemplo foi removi
 pagamento, edição de banners/páginas/cupons no painel, avaliações, recuperação de carrinho.
 
 Testes: `npm test` (113+ testes, incluindo regras de preço, catálogo público, busca, carrinho e importador). Capturas em `docs/loja/` (dados **fictícios** de desenvolvimento).
+
+## Fase 4 — checkout, pagamento, frete, pedidos e contas
+
+**Fluxo:** carrinho → checkout (CEP preenche o endereço via ViaCEP, frete cotado no servidor, cupom) → pedido → Pix (QR + copia e cola) ou cartão → página do pedido que se atualiza sozinha. O servidor recalcula tudo (preços, frete, desconto); o navegador nunca decide valores.
+
+**Garantias:** reserva atômica de estoque (último item não vende duas vezes), cupom consumido atomicamente, chave de idempotência (clique duplo não duplica), compensação se o provedor falhar, pedidos não pagos expiram em 60 min (estoque e cupom voltam), webhook do Mercado Pago com assinatura HMAC, conferência de valor/referência e repetição segura.
+
+**Contas:** cadastro/login de cliente (cookie próprio, separado do painel), "Meus pedidos", recuperação de senha por e-mail, acompanhar pedido por número + e-mail ou pelo link com código. CPF aparece mascarado no painel.
+
+**Painel:** cupons (`/admin/cupons`), pagamento e CPF mascarado no pedido, mudança de status com e-mail ao cliente. Cancelar pedido pago devolve o estoque, mas **o estorno é feito manualmente no painel do Mercado Pago**.
+
+### Variáveis de ambiente
+
+| Variável | Para quê |
+|---|---|
+| `MELHOR_ENVIO_TOKEN`, `MELHOR_ENVIO_AMBIENTE` (`sandbox`/`producao`), `MELHOR_ENVIO_EMAIL_CONTATO` | Cotação de frete real |
+| `MERCADO_PAGO_ACCESS_TOKEN`, `NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY`, `MERCADO_PAGO_WEBHOOK_SECRET` | Pix e cartão; o webhook responde 503 sem o segredo |
+| `RESEND_API_KEY`, `EMAIL_REMETENTE` | E-mails reais (sem isso, vão para o console) |
+| `CRON_SECRET` | Autoriza `GET /api/cron/expirar-pedidos` (agende a cada ~10 min) |
+| `FRETE_SIMULADO=true`, `PAGAMENTO_SIMULADO=true` | Só desenvolvimento; o pagamento simulado é bloqueado em produção |
+| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_INDEXAR` | URL pública; buscadores só são liberados com `true` |
+
+Os provedores são escolhidos pelas variáveis: com token real usa-se Melhor Envio/Mercado Pago; com os flags de simulação, os simuladores.
+
+### Limites conhecidos (ser transparente)
+- **Mercado Pago e Melhor Envio estão implementados e testados com HTTP simulado, mas ainda NÃO validados contra as APIs reais** (faltam as chaves de sandbox). Também falta testar o Brick de cartão de verdade.
+- Sem estorno automático; sem verificação de e-mail no cadastro; limite de tentativas em memória (por instância).
+- Frete exige dados de embalagem (peso/medidas) em cada produto e o CEP de origem em Configurações.
+- Teste de ponta a ponta no navegador (compra Pix/cartão, recusa, conta, recuperação, painel, celular) passou em modo simulado; os scripts não fazem parte do repositório.

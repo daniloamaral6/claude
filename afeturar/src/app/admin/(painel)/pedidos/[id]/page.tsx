@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { formatarBRL } from "@/lib/moeda";
+import { mascararCpf } from "@/lib/validacoes";
 import { exigirPainel } from "@/server/auth";
 import { NOME_STATUS, obterPedido, TRANSICOES } from "@/server/pedidos";
 import { FormStatus } from "./FormStatus";
@@ -23,7 +24,8 @@ export default async function PedidoDetalhe({ params }: { params: Promise<{ id: 
           <h2 id="cli" className="mb-2 font-medium">Cliente e entrega</h2>
           <p>{p.nome}</p><p>{p.email}</p>{p.telefone && <p>{p.telefone}</p>}
           <p className="mt-3">{p.entregaDestinatario}<br />{p.entregaLogradouro}, {p.entregaNumero}{p.entregaComplemento ? ` — ${p.entregaComplemento}` : ""}<br />{p.entregaBairro} — {p.entregaCidade}/{p.entregaUf}<br />CEP {p.entregaCep}</p>
-          {p.freteServico && <p className="mt-3 text-marrom-suave">Frete: {p.freteServico}{p.fretePrazoDias ? ` (${p.fretePrazoDias} dias úteis)` : ""}</p>}
+          {p.clienteDocumento && <p className="mt-2 text-marrom-suave">CPF {mascararCpf(p.clienteDocumento)}</p>}
+          {p.freteServico && <p className="mt-3 text-marrom-suave">Frete: {p.freteServico}{p.fretePrazoDias != null ? ` · ${p.fretePrazoDias} dias úteis de transporte + ${p.prazoPreparoDias} de preparo` : ""}</p>}
         </section>
         <section aria-labelledby="val" className="rounded-[var(--radius-card)] border border-linha bg-white p-5 text-sm">
           <h2 id="val" className="mb-2 font-medium">Valores</h2>
@@ -33,7 +35,10 @@ export default async function PedidoDetalhe({ params }: { params: Promise<{ id: 
             <div className="flex justify-between"><dt>Frete</dt><dd>{formatarBRL(p.freteCentavos)}</dd></div>
             <div className="flex justify-between border-t border-linha pt-2 font-semibold"><dt>Total</dt><dd>{formatarBRL(p.totalCentavos)}</dd></div>
           </dl>
-          {p.pagamentos[0] && <p className="mt-3 text-marrom-suave">Pagamento: {p.pagamentos[0].metodo === "PIX" ? "Pix" : "Cartão"} · {p.pagamentos[0].status.toLowerCase()}</p>}
+          {p.pagamentos.map((g) => (
+            <p key={g.id} className="mt-3 text-marrom-suave">Pagamento: {g.metodo === "PIX" ? "Pix" : `Cartão${g.parcelas ? ` ${g.parcelas}x` : ""}`} · <strong className="text-marrom">{g.status.toLowerCase()}</strong>{g.statusDetalhe ? ` (${g.statusDetalhe})` : ""}<br /><span className="text-xs">{g.provedor} #{g.idExterno}</span></p>
+          ))}
+          {p.status === "AGUARDANDO_PAGAMENTO" && p.expiraEm && <p className="mt-3 text-xs text-marrom-suave">Expira em {dt(p.expiraEm)} se não for pago (o estoque volta).</p>}
         </section>
       </div>
       <section aria-labelledby="itens" className="rounded-[var(--radius-card)] border border-linha bg-white p-5">
@@ -50,7 +55,7 @@ export default async function PedidoDetalhe({ params }: { params: Promise<{ id: 
       </section>
       <section aria-labelledby="acao" className="rounded-[var(--radius-card)] border border-linha bg-white p-5">
         <h2 id="acao" className="mb-4 font-medium">Andamento</h2>
-        <FormStatus id={p.id} rastreio={p.codigoRastreio ?? ""} proximos={TRANSICOES[p.status].map((s) => ({ valor: s, nome: NOME_STATUS[s] }))} />
+        <FormStatus id={p.id} pago={p.pagamentos.some((g) => g.status === "APROVADO")} rastreio={p.codigoRastreio ?? ""} proximos={TRANSICOES[p.status].map((s) => ({ valor: s, nome: NOME_STATUS[s] }))} />
       </section>
       <section aria-labelledby="hist" className="rounded-[var(--radius-card)] border border-linha bg-white p-5">
         <h2 id="hist" className="mb-3 font-medium">Histórico</h2>

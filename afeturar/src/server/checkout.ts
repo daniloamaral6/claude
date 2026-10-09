@@ -14,7 +14,7 @@ import { provedorDeFrete } from "./frete";
 import { aplicarFreteGratis, type OpcaoFreteFinal } from "./frete/regras";
 import { ErroFrete, type PacoteItem, type ProvedorFrete } from "./frete/tipos";
 import { provedorDePagamento } from "./pagamentos";
-import { ErroPagamento, type ConsultaPagamento, type ProvedorPagamento, type ResultadoPagamento } from "./pagamentos/tipos";
+import { ErroPagamento, PagamentoNaoEncontrado, type ConsultaPagamento, type ProvedorPagamento, type ResultadoPagamento } from "./pagamentos/tipos";
 import { liberarReservas, travarPedido } from "./reservas";
 
 const nomeProvedor = (n: string) => n.toUpperCase();
@@ -283,7 +283,8 @@ export async function aplicarStatusPagamento(c: ConsultaPagamento, provedor: str
 export async function processarNotificacaoPagamento(idExterno: string, deps: Dependencias = {}) {
   const d = dep(deps);
   if (!d.pagamento) throw new ErroNegocio("Provedor de pagamento não configurado.");
-  const consulta = await d.pagamento.consultar(idExterno);
+  let consulta: ConsultaPagamento;
+  try { consulta = await d.pagamento.consultar(idExterno); } catch (e) { if (e instanceof PagamentoNaoEncontrado) return "ignorado" as const; throw e; }
   return aplicarStatusPagamento(consulta, nomeProvedor(d.pagamento.nome), d);
 }
 

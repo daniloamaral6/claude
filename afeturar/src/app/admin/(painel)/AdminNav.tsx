@@ -8,10 +8,11 @@ const itens = [
   { href: "/admin/produtos", label: "Produtos" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/categorias", label: "Categorias" },
+  { href: "/admin/cupons", label: "Cupons" },
   { href: "/admin/cores", label: "Cores" },
   { href: "/admin/configuracoes", label: "Configurações", soAdmin: true },
 ];
-const emBreve = ["Clientes", "Cupons e promoções", "Banners", "Páginas", "Relatórios"];
+const emBreve = ["Clientes", "Banners", "Páginas", "Relatórios"];
 
 export function AdminNav({ ehAdmin }: { ehAdmin: boolean }) {
   const path = usePathname();

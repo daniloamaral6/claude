@@ -121,6 +121,7 @@ describe("pagamento: Mercado Pago", () => {
     expect(await mp.consultar("99")).toEqual({ idExterno: "99", status: "APROVADO", detalhe: null, valorCentavos: 1250, moeda: "BRL", referenciaExterna: "ped9", metodo: "PIX" });
     expect((f.mock.calls[0] as unknown as [string])[0]).toBe("https://api.mercadopago.com/v1/payments/99");
     await expect(mp.consultar("../../users")).rejects.toThrow(/inválido/);
+    await expect(mercadoPago({ accessToken: "T", fetchImpl: (async () => resposta({ message: "not found" }, 404)) as unknown as typeof fetch }).consultar("1")).rejects.toBeInstanceOf((await import("../src/server/pagamentos/tipos")).PagamentoNaoEncontrado);
     await expect(mercadoPago({ accessToken: "T", fetchImpl: (async () => resposta({ message: "invalid_token SEGREDO" }, 401)) as unknown as typeof fetch }).consultar("1")).rejects.not.toThrow(/SEGREDO|invalid_token/);
   });
   it("mapeia status e formata a data em horário de Brasília", () => {

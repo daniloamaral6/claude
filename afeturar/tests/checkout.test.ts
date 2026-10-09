@@ -14,7 +14,7 @@ afterAll(() => prisma.$disconnect());
 type Cartao = Partial<ResultadoPagamento> | Error;
 function pagamentoFalso(cartao: Cartao = { status: "APROVADO", detalhe: "accredited" }) {
   const criarPix = vi.fn(async (p: { numero: number }, expiraEm: Date): Promise<ResultadoPagamento> => ({ idExterno: `pix-${randomUUID()}`, status: "PENDENTE", detalhe: "pending_waiting_transfer", pix: { copiaECola: `0002-PIX-${p.numero}`, qrBase64: "QR64", ticketUrl: null, expiraEm } }));
-  const criarCartao = vi.fn(async (): Promise<ResultadoPagamento> => { if (cartao instanceof Error) throw cartao; return { idExterno: `card-${randomUUID()}`, status: "PENDENTE", detalhe: null, ...cartao }; });
+  const criarCartao = vi.fn(async (...args: unknown[]): Promise<ResultadoPagamento> => { void args; if (cartao instanceof Error) throw cartao; return { idExterno: `card-${randomUUID()}`, status: "PENDENTE", detalhe: null, ...cartao }; });
   const prov: ProvedorPagamento = { nome: "falso", criarPix, criarCartao, consultar: vi.fn() };
   return { prov, criarPix, criarCartao };
 }

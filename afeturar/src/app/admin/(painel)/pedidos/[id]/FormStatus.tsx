@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { aoEnviar, BotaoEnvio, MensagemEstado, type Estado } from "@/components/admin/Ui";
 import { gravarRastreio, mudarStatus } from "./actions";
 
-export function FormStatus({ id, proximos, rastreio }: { id: string; proximos: { valor: string; nome: string }[]; rastreio: string }) {
+export function FormStatus({ id, proximos, rastreio, pago }: { id: string; proximos: { valor: string; nome: string }[]; rastreio: string; pago: boolean }) {
   const [estado, acao, pendente] = useActionState<Estado, FormData>(mudarStatus, {});
   const [estadoR, acaoR, pendenteR] = useActionState<Estado, FormData>(gravarRastreio, {});
   return (
@@ -21,11 +21,12 @@ export function FormStatus({ id, proximos, rastreio }: { id: string; proximos: {
           <div><label htmlFor="para" className="mb-1 block text-sm font-medium">Mudar status para</label>
             <select id="para" name="para" className="campo w-64">{proximos.map((p) => <option key={p.valor} value={p.valor}>{p.nome}</option>)}</select></div>
           <div><label htmlFor="nota" className="mb-1 block text-sm font-medium">Observação (opcional)</label><input id="nota" name="nota" maxLength={300} className="campo" /></div>
+          {pago && proximos.some((p) => p.valor === "CANCELADO") && <p className="rounded-lg bg-cobre/20 p-3 text-xs">Atenção: se o cliente já pagou, cancelar devolve o estoque, mas o <strong>estorno do valor é feito por você no painel do Mercado Pago</strong>.</p>}
           <input type="hidden" name="rastreio" value={rastreio} />
           <BotaoEnvio pendente={pendente}>Atualizar status</BotaoEnvio>
-          <MensagemEstado estado={estado} />
         </form>
       ) : <p className="border-t border-linha pt-5 text-sm text-marrom-suave">Este pedido está em um status final.</p>}
+      <MensagemEstado estado={estado} />
     </div>
   );
 }

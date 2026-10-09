@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { ErroPagamento, type ConsultaPagamento, type PedidoParaPagar, type ProvedorPagamento, type ResultadoPagamento, type StatusPagamentoProv } from "./tipos";
+import { ErroPagamento, PagamentoNaoEncontrado, type ConsultaPagamento, type PedidoParaPagar, type ProvedorPagamento, type ResultadoPagamento, type StatusPagamentoProv } from "./tipos";
 
 /**
  * Mercado Pago (API de Pagamentos /v1/payments).
@@ -38,6 +38,7 @@ export function mercadoPago(opts: { accessToken: string; fetchImpl?: typeof fetc
       throw new ErroPagamento("Não foi possível falar com o serviço de pagamento agora. Tente novamente.");
     }
     const json = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+    if (r.status === 404 && init.method === "GET") throw new PagamentoNaoEncontrado("Pagamento não encontrado.");
     if (!r.ok) {
       console.error("Mercado Pago respondeu", r.status, JSON.stringify(json).slice(0, 300));
       throw new ErroPagamento(r.status >= 500 ? "O serviço de pagamento está instável. Tente novamente em instantes." : "O pagamento não pôde ser processado. Confira os dados e tente novamente.");
