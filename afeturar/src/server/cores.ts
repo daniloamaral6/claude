@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { registrarAuditoria } from "./auditoria";
+import { reindexarTodos } from "./busca";
 import { ErroNegocio } from "./categorias";
 import { corSchema, type CorInput } from "./validacao";
 
@@ -18,6 +19,7 @@ export async function criarCor(entrada: CorInput, autorId: string) {
 export async function atualizarCor(id: string, entrada: CorInput, autorId: string) {
   const dados = corSchema.parse(entrada);
   const cor = await db.cor.update({ where: { id }, data: dados });
+  await reindexarTodos();
   await registrarAuditoria(autorId, "atualizar", "Cor", id, { nome: cor.nome });
   return cor;
 }

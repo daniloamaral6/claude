@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { registrarAuditoria } from "./auditoria";
+import { reindexarTodos } from "./busca";
 import { categoriaSchema, type CategoriaInput } from "./validacao";
 
 export class ErroNegocio extends Error {}
@@ -42,6 +43,7 @@ export async function atualizarCategoria(id: string, entrada: CategoriaInput, au
   const dados = categoriaSchema.parse(entrada);
   await validarPai(dados.paiId, id);
   const cat = await db.categoria.update({ where: { id }, data: dados });
+  await reindexarTodos();
   await registrarAuditoria(autorId, "atualizar", "Categoria", id, { nome: cat.nome });
   return cat;
 }

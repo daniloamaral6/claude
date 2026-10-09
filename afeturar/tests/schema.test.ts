@@ -122,7 +122,7 @@ describe("cupons e endereços", () => {
     await expect(prisma.usuario.create({ data: { email: "u@x.com" } })).rejects.toThrow();
   });
 
-  it("não duplica o mesmo item no carrinho", async () => {
+  it("não duplica o mesmo item (mesma variação e personalização) no carrinho", async () => {
     const p = await criarProdutoBase();
     const v = await prisma.variacao.create({ data: { produtoId: p.id, sku: "C-1" } });
     const c = await prisma.carrinho.create({ data: { tokenVisitante: "t1" } });

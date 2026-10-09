@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { registrarAuditoria } from "./auditoria";
+import { indexarProduto } from "./busca";
 import { ErroNegocio, slugLivre } from "./categorias";
 import { produtoSchema, type ProdutoInput } from "./validacao";
 
@@ -33,7 +34,7 @@ export async function listarProdutos(f: { busca?: string; categoriaId?: string; 
 export const obterProduto = (id: string) =>
   db.produto.findUnique({
     where: { id },
-    include: { variacoes: { orderBy: { criadoEm: "asc" } }, imagens: { orderBy: { ordem: "asc" } }, opcoesPersonalizacao: { orderBy: { ordem: "asc" } } },
+    include: { variacoes: { orderBy: [{ criadoEm: "asc" }, { sku: "asc" }] }, imagens: { orderBy: { ordem: "asc" } }, opcoesPersonalizacao: { orderBy: { ordem: "asc" } } },
   });
 
 async function conferirReferencias(dados: ProdutoInput) {
@@ -64,6 +65,7 @@ export async function criarProduto(entrada: unknown, autorId: string) {
       opcoesPersonalizacao: { create: opcoesPersonalizacao.map((o, ordem) => ({ ...semId(o), ordem })) },
     },
   });
+  await indexarProduto(produto.id);
   await registrarAuditoria(autorId, "criar", "Produto", produto.id, { nome: produto.nome });
   return produto;
 }
@@ -105,6 +107,7 @@ export async function atualizarProduto(id: string, entrada: unknown, autorId: st
       else await tx.opcaoPersonalizacao.create({ data: { ...resto, ordem, produtoId: id } });
     }
   });
+  await indexarProduto(id);
   await registrarAuditoria(autorId, "atualizar", "Produto", id, { nome: dados.nome, ativo: dados.ativo });
   return obterProduto(id);
 }

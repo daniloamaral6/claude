@@ -74,6 +74,9 @@ model Produto {
   seoTitulo     String?
   seoDescricao  String?
 
+  /// Texto normalizado (minúsculas, sem acentos) para a busca da loja. Mantido por src/server/busca.ts.
+  indiceBusca   String @default("")
+
   categoriaId String
   categoria   Categoria @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
 
@@ -257,6 +260,8 @@ model ItemCarrinho {
   quantidade Int      @default(1)
   /// { "<opcaoId>": "texto digitado" }
   personalizacao Json?
+  /// Identifica a personalização (vazio = sem). Mesma variação com textos diferentes = linhas diferentes.
+  chave      String   @default("")
 
   @@index([carrinhoId])
 }
