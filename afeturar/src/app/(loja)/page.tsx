@@ -1,115 +1,118 @@
-import Image from "next/image";
 import Link from "next/link";
+import { Carrossel } from "@/components/Carrossel";
+import { FotoPlaceholder } from "@/components/FotoPlaceholder";
+import { HeroSlider, type Slide } from "@/components/HeroSlider";
+import { Icone } from "@/components/Icones";
+import { ProdutoCardHome } from "@/components/ProdutoCardHome";
+import { PrototipoAviso } from "@/components/PrototipoAviso";
+import { produtosExemplo } from "@/lib/exemplo";
 import { categorias, site } from "@/lib/site";
 
-const secoesProdutos = [
-  { id: "novidades", titulo: "Novidades" },
-  { id: "mais-vendidos", titulo: "Mais vendidos" },
-  { id: "favoritos-dos-clientes", titulo: "Favoritos dos clientes" },
+const slides: Slide[] = [
+  {
+    eyebrow: "Afeturar",
+    titulo: site.slogan,
+    texto: "Objetos para casa, presentes e peças personalizadas que transformam pequenos detalhes em algo especial.",
+    cta: { href: "/loja", label: "Explorar produtos" },
+    cta2: { href: "/sobre", label: "Conheça a Afeturar" },
+  },
+  {
+    eyebrow: "Presentes e personalizados",
+    titulo: "Feito do seu jeito.",
+    texto: "Peças personalizadas e sob encomenda, com o prazo informado antes da compra.",
+    cta: { href: "/categorias/personalizados", label: "Ver personalizados" },
+  },
 ];
 
-function VazioProdutos() {
+function Titulo({ eyebrow, children, id }: { eyebrow: string; children: React.ReactNode; id: string }) {
   return (
-    <p className="rounded-[var(--radius-card)] border border-dashed border-linha px-6 py-10 text-center text-sm text-marrom-suave">
-      Os produtos aparecerão aqui assim que forem cadastrados no painel.
-    </p>
+    <div>
+      <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-terracota-escuro">{eyebrow}</p>
+      <h2 id={id} className="mt-1 text-3xl sm:text-4xl">{children}</h2>
+    </div>
   );
 }
 
 export default function Home() {
   return (
     <>
-      {/* Hero — espaço reservado para foto real de ambiente (a ser fornecida) */}
-      <section aria-labelledby="hero-titulo" className="bg-creme-profundo">
-        <div className="container-loja grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-24">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.35em] text-terracota-escuro">Afeturar</p>
-            <h1 id="hero-titulo" className="mt-4 text-4xl font-light leading-tight sm:text-5xl">
-              {site.slogan}
-            </h1>
-            <p className="mt-5 max-w-md text-lg text-marrom-suave">
-              Objetos para casa, presentes e peças personalizadas que transformam pequenos detalhes em algo especial.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="#categorias" className="btn btn-primary">Explorar produtos</Link>
-              <Link href="/categorias/personalizados" className="btn btn-secondary">Peças personalizadas</Link>
-            </div>
-          </div>
-          <div className="mx-auto w-full max-w-sm lg:max-w-md">
-            <Image
-              src="/brand/logo-afeturar.jpeg"
-              alt="Afeturar — Dê forma ao que você sente"
-              width={1254}
-              height={1254}
-              sizes="(min-width: 1024px) 448px, 384px"
-              priority
-              className="h-auto w-full rounded-full"
-            />
-          </div>
-        </div>
-      </section>
+      <PrototipoAviso />
+      <HeroSlider slides={slides} />
 
-      <section id="categorias" aria-labelledby="cat-titulo" className="container-loja scroll-mt-24 pt-20">
-        <h2 id="cat-titulo" className="text-2xl font-light tracking-wide sm:text-3xl">Categorias</h2>
-        <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+      <section id="categorias" aria-labelledby="cat-t" className="container-loja scroll-mt-24 pt-14">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <Titulo eyebrow="Escolha por ambiente" id="cat-t">Nossas categorias</Titulo>
+          <Link href="/loja" className="inline-flex min-h-11 items-center gap-2 text-sm underline underline-offset-4 hover:text-terracota-escuro">
+            Ver todas as categorias <Icone nome="seta" tamanho={16} />
+          </Link>
+        </div>
+        <ul className="relative mt-6 flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:none] lg:grid lg:grid-cols-7 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
           {categorias.map((c) => (
-            <li key={c.slug}>
-              <Link
-                href={`/categorias/${c.slug}`}
-                className="flex aspect-[4/3] items-end rounded-[var(--radius-card)] border border-linha bg-creme-profundo p-4 text-base font-medium transition-colors hover:border-terracota hover:bg-white"
-              >
-                {c.nome}
+            <li key={c.slug} className="w-[40%] shrink-0 snap-start sm:w-[25%] lg:w-auto">
+              <Link href={`/categorias/${c.slug}`} className="group block overflow-hidden rounded-[var(--radius-card)] border border-linha bg-white">
+                <FotoPlaceholder legenda="Foto" className="aspect-[4/3] w-full transition-colors group-hover:bg-linha" />
+                <span className="flex min-h-11 items-center justify-between gap-1 px-3 text-sm font-medium">
+                  {c.nome} <Icone nome="direita" tamanho={14} />
+                </span>
               </Link>
             </li>
           ))}
         </ul>
       </section>
 
-      {secoesProdutos.map((s) => (
-        <section key={s.id} id={s.id} aria-labelledby={`${s.id}-t`} className="container-loja pt-20">
-          <h2 id={`${s.id}-t`} className="text-2xl font-light tracking-wide sm:text-3xl">{s.titulo}</h2>
-          <div className="mt-8"><VazioProdutos /></div>
-        </section>
-      ))}
+      <section aria-labelledby="nov-t" className="container-loja pt-14">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <Titulo eyebrow="Acabou de chegar" id="nov-t">Novidades</Titulo>
+          <Link href="/lancamentos" className="btn btn-secondary">Ver novidades <Icone nome="seta" tamanho={16} /></Link>
+        </div>
+        <div className="mt-6">
+          <Carrossel rotulo="Novidades">{produtosExemplo.map((p) => <ProdutoCardHome key={p.slug} p={p} />)}</Carrossel>
+        </div>
+      </section>
 
-      <section aria-labelledby="presentes-t" className="mt-20 bg-creme-profundo">
-        <div className="container-loja grid gap-8 py-14 md:grid-cols-2">
-          <div>
-            <h2 id="presentes-t" className="text-2xl font-light tracking-wide sm:text-3xl">Presentes especiais</h2>
-            <p className="mt-3 max-w-md text-marrom-suave">Para quem você ama e para quem merece um carinho.</p>
-            <Link href="/categorias/presentes" className="btn btn-secondary mt-6">Ver presentes</Link>
+      <section aria-labelledby="mv-t" className="mt-14 bg-creme-profundo py-12">
+        <div className="container-loja">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <Titulo eyebrow="Mais amados da Afeturar" id="mv-t">Mais vendidos</Titulo>
+            <Link href="/loja" className="btn btn-secondary">Ver todos os produtos <Icone nome="seta" tamanho={16} /></Link>
           </div>
-          <div>
-            <h2 className="text-2xl font-light tracking-wide sm:text-3xl">Feito do seu jeito</h2>
-            <p className="mt-3 max-w-md text-marrom-suave">Peças personalizadas e sob encomenda. O prazo é informado antes da compra.</p>
-            <Link href="/categorias/personalizados" className="btn btn-secondary mt-6">Ver personalizados</Link>
+          <div className="mt-6">
+            <Carrossel rotulo="Mais vendidos">{[...produtosExemplo].reverse().map((p) => <ProdutoCardHome key={p.slug} p={p} />)}</Carrossel>
           </div>
         </div>
       </section>
 
-      <section aria-labelledby="insta-t" className="container-loja pt-20 text-center">
-        <h2 id="insta-t" className="text-2xl font-light tracking-wide sm:text-3xl">Acompanhe no Instagram</h2>
-        <p className="mt-3 text-marrom-suave">Novidades e bastidores em {site.instagramUser}.</p>
-        <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="btn btn-primary mt-6">
-          Abrir Instagram
-        </a>
+      <section aria-labelledby="dep-t" className="container-loja pt-14">
+        <div className="text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-terracota-escuro">Histórias reais</p>
+          <h2 id="dep-t" className="mt-1 text-3xl sm:text-4xl">O que nossos clientes dizem</h2>
+        </div>
+        <ul className="mt-8 grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((n) => (
+            <li key={n} className="flex gap-4 rounded-[var(--radius-card)] border border-linha bg-white p-5">
+              <div aria-hidden className="size-14 shrink-0 rounded-full bg-creme-profundo" />
+              <div>
+                <p className="text-sm text-marrom-suave">Espaço do depoimento. Só serão exibidas avaliações reais de clientes, com autorização.</p>
+                <p className="mt-2 text-sm font-medium text-terracota-escuro">Nome do cliente</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      <section aria-labelledby="news-t" className="container-loja pt-20">
-        <div className="mx-auto max-w-xl rounded-[var(--radius-card)] border border-linha bg-white p-6 sm:p-8">
-          <h2 id="news-t" className="text-2xl font-light tracking-wide">Receba novidades</h2>
-          <form className="mt-5 space-y-4" action="#" aria-describedby="news-aviso">
-            <div>
-              <label htmlFor="news-email" className="mb-1 block text-sm font-medium">E-mail</label>
-              <input id="news-email" name="email" type="email" required autoComplete="email" className="campo" />
+      <section aria-labelledby="pres-t" className="container-loja mt-14">
+        <h2 id="pres-t" className="sr-only">Presentes e personalizados</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {[
+            { t: "Presentes especiais", d: "Para quem você ama e para quem merece um carinho.", href: "/categorias/presentes", b: "Ver presentes" },
+            { t: "Feito do seu jeito", d: "Peças personalizadas e sob encomenda. O prazo é informado antes da compra.", href: "/categorias/personalizados", b: "Ver personalizados" },
+          ].map((c) => (
+            <div key={c.t} className="rounded-[var(--radius-card)] bg-creme-profundo p-8">
+              <h3 className="font-serif text-2xl">{c.t}</h3>
+              <p className="mt-2 max-w-sm text-marrom-suave">{c.d}</p>
+              <Link href={c.href} className="btn btn-secondary mt-5">{c.b}</Link>
             </div>
-            <label className="flex items-start gap-3 text-sm">
-              <input type="checkbox" name="consentimento" required className="mt-1 size-5 accent-terracota-escuro" />
-              <span>Concordo em receber e-mails da Afeturar e posso cancelar quando quiser.</span>
-            </label>
-            <p id="news-aviso" className="text-xs text-marrom-suave">O envio será ativado na etapa de integrações.</p>
-            <button type="button" disabled className="btn btn-primary">Inscrever-me</button>
-          </form>
+          ))}
         </div>
       </section>
     </>

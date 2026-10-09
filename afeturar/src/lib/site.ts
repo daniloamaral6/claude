@@ -23,3 +23,22 @@ export const categorias = [
   { slug: "presentes", nome: "Presentes" },
   { slug: "personalizados", nome: "Personalizados" },
 ] as const;
+
+/**
+ * Faixa de avisos do topo (editável no painel). Textos provisórios e neutros:
+ * só passam a afirmar valores/condições quando você os definir (ex.: mínimo de frete grátis).
+ */
+export const avisosTopo = [
+  { icone: "frete", texto: "Frete grátis por valor mínimo (a configurar)" },
+  { icone: "pagamento", texto: "Pagamento por Pix e cartão" },
+  { icone: "coracao", texto: "Dê forma ao que você sente" },
+] as const;
+
+export const navPrincipal = [
+  { href: "/", label: "Início" },
+  { href: "/loja", label: "Loja" },
+  { href: "#categorias", label: "Categorias", submenu: true },
+  { href: "/lancamentos", label: "Novidades" },
+  { href: "/sobre", label: "Sobre" },
+  { href: "/fale-conosco", label: "Contato" },
+] as const;

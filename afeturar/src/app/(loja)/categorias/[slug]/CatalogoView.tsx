@@ -7,14 +7,14 @@ import { cores, produtosExemplo, type Disponibilidade } from "@/lib/exemplo";
 
 type Ordem = "novidades" | "menor" | "maior";
 
-export function CatalogoView({ categoriaSlug, categoriaNome }: { categoriaSlug: string; categoriaNome: string }) {
+export function CatalogoView({ categoriaSlug, categoriaNome }: { categoriaSlug?: string; categoriaNome: string }) {
   const [ordem, setOrdem] = useState<Ordem>("novidades");
   const [corSel, setCorSel] = useState<string[]>([]);
   const [disp, setDisp] = useState<Disponibilidade | "todas">("todas");
   const [soPromo, setSoPromo] = useState(false);
 
   const lista = useMemo(() => {
-    let l = produtosExemplo.filter((p) => p.categoria === categoriaSlug);
+    let l = categoriaSlug ? produtosExemplo.filter((p) => p.categoria === categoriaSlug) : produtosExemplo;
     if (corSel.length) l = l.filter((p) => p.cores.some((c) => corSel.includes(c)));
     if (disp !== "todas") l = l.filter((p) => p.disponibilidade === disp);
     if (soPromo) l = l.filter((p) => p.promocional);

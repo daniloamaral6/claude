@@ -50,3 +50,16 @@ Rotas (já com a estrutura final): `/categorias/[slug]`, `/produtos/[slug]`, `/c
   preços no servidor entram na Etapa 3/4.
 - Os mostruários de cor (preto, branco, marrom, bege caucasiano, verde oliva, verde menta, rosa bebê,
   vermelho, azul, dourado, mármore) usam tons aproximados de interface, não cores reais de produto.
+
+## Layout da home (referência enviada pela cliente)
+
+Adotado **apenas o layout** da imagem de referência: faixa de avisos no topo, cabeçalho com menu central
+(Início, Loja, Categorias com submenu, Novidades, Sobre, Contato) e ícones, banner com foto à direita e
+texto à esquerda, faixa de categorias com foto, carrosséis de produtos, depoimentos e rodapé com
+newsletter e redes.
+
+**Não foi copiado** (conteúdo da referência): as categorias dela, textos, preços, avaliações e depoimentos
+com pessoas, fotos, o logotipo em letras e a frase cursiva. A faixa de avisos usa textos neutros editáveis
+(`avisosTopo` em `src/lib/site.ts`); o valor mínimo de frete grátis está **a configurar**.
+Títulos em serifa do sistema (`--font-serif`) são proposta a partir do layout, não a fonte da marca.
+Depoimentos: só reais e autorizados; hoje são espaços reservados. Novas rotas: `/loja` e `/lancamentos`.
