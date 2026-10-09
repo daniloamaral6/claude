@@ -3,13 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { categorias, navPrincipal } from "@/lib/site";
+import { navPrincipal, type CategoriaMenu } from "@/lib/site";
 import { Icone } from "./Icones";
 
 const IconBtn = "relative inline-flex size-11 items-center justify-center rounded-full text-marrom hover:bg-creme-profundo";
 const NavLink = "inline-flex min-h-11 items-center px-1 text-sm underline-offset-8 hover:text-terracota-escuro hover:underline";
 
-export function Header({ carrinhoQtd = 0 }: { carrinhoQtd?: number }) {
+export function Header({ categorias, carrinhoQtd = 0 }: { categorias: CategoriaMenu[]; carrinhoQtd?: number }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [catAberto, setCatAberto] = useState(false);
   const [buscaAberta, setBuscaAberta] = useState(false);
@@ -54,9 +54,15 @@ export function Header({ carrinhoQtd = 0 }: { carrinhoQtd?: number }) {
                   </button>
                   {catAberto && (
                     <ul id={catId} className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--radius-card)] border border-linha bg-white p-2 shadow-lg">
+                      {categorias.length === 0 && <li className="px-3 py-2 text-sm text-marrom-suave">Em breve</li>}
                       {categorias.map((c) => (
                         <li key={c.slug}>
                           <Link href={`/categorias/${c.slug}`} className="flex min-h-11 items-center rounded-lg px-3 text-sm hover:bg-creme-profundo" onClick={() => setCatAberto(false)}>{c.nome}</Link>
+                          {c.filhas.length > 0 && (
+                            <ul className="mb-1 ml-4 border-l border-linha pl-2">
+                              {c.filhas.map((f) => <li key={f.slug}><Link href={`/categorias/${f.slug}`} className="flex min-h-9 items-center px-2 text-sm text-marrom-suave hover:text-terracota-escuro" onClick={() => setCatAberto(false)}>{f.nome}</Link></li>)}
+                            </ul>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -82,9 +88,9 @@ export function Header({ carrinhoQtd = 0 }: { carrinhoQtd?: number }) {
 
       {buscaAberta && (
         <div className="border-t border-linha bg-creme">
-          <form role="search" action="/busca" className="container-loja flex gap-2 py-3">
+          <form role="search" action="/busca" method="get" className="container-loja flex gap-2 py-3">
             <label htmlFor="busca" className="sr-only">Buscar produtos</label>
-            <input id="busca" name="q" type="search" placeholder="O que você procura?" className="campo" autoFocus />
+            <input id="busca" name="q" type="search" placeholder="O que você procura?" maxLength={80} className="campo" autoFocus />
             <button type="submit" className="btn btn-primary">Buscar</button>
           </form>
         </div>
@@ -99,7 +105,10 @@ export function Header({ carrinhoQtd = 0 }: { carrinhoQtd?: number }) {
                   <p className="flex min-h-12 items-center font-medium">{n.label}</p>
                   <ul className="pb-2 pl-3">
                     {categorias.map((c) => (
-                      <li key={c.slug}><Link href={`/categorias/${c.slug}`} className="flex min-h-11 items-center text-sm" onClick={() => setMenuAberto(false)}>{c.nome}</Link></li>
+                      <li key={c.slug}>
+                        <Link href={`/categorias/${c.slug}`} className="flex min-h-11 items-center text-sm" onClick={() => setMenuAberto(false)}>{c.nome}</Link>
+                        {c.filhas.map((f) => <Link key={f.slug} href={`/categorias/${f.slug}`} className="flex min-h-9 items-center pl-4 text-sm text-marrom-suave" onClick={() => setMenuAberto(false)}>{f.nome}</Link>)}
+                      </li>
                     ))}
                   </ul>
                 </li>

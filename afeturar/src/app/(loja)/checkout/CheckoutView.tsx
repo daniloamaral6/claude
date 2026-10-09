@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { brl } from "@/lib/exemplo";
+import { formatarBRL as brl } from "@/lib/moeda";
 
 type Pagamento = "pix" | "cartao";
 
@@ -16,7 +16,7 @@ function Campo({ id, label, erro, ...rest }: { id: string; label: string; erro?:
   );
 }
 
-export function CheckoutView() {
+export function CheckoutView({ subtotalCentavos }: { subtotalCentavos: number }) {
   const [pag, setPag] = useState<Pagamento>("pix");
   const [tentou, setTentou] = useState(false);
   const [confirmado, setConfirmado] = useState(false);
@@ -103,10 +103,10 @@ export function CheckoutView() {
         <aside aria-label="Resumo do pedido" className="h-fit rounded-[var(--radius-card)] border border-linha bg-white p-5">
           <h2 className="text-lg font-medium">Resumo</h2>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><dt>Itens (exemplo)</dt><dd>{brl(164)}</dd></div>
+            <div className="flex justify-between"><dt>Itens</dt><dd>{brl(subtotalCentavos)}</dd></div>
             <div className="flex justify-between"><dt>Frete</dt><dd className="text-marrom-suave">Após informar o CEP</dd></div>
             <div className="flex justify-between"><dt>Desconto</dt><dd>—</dd></div>
-            <div className="flex justify-between border-t border-linha pt-3 text-base font-semibold"><dt>Total</dt><dd>{brl(164)}</dd></div>
+            <div className="flex justify-between border-t border-linha pt-3 text-base font-semibold"><dt>Total</dt><dd>{brl(subtotalCentavos)}</dd></div>
           </dl>
           <p className="mt-3 text-xs text-marrom-suave">Valores finais são recalculados e validados no servidor.</p>
           <label className="mt-4 flex items-start gap-3 text-sm">

@@ -143,3 +143,25 @@ npm run catalogo:importar -- planilha.xlsx --fotos ./fotos --aplicar --admin voc
 ```
 Tudo entra como **rascunho**; publicar é um passo manual no painel. Idempotente (produto com o mesmo nome é ignorado), cores novas são criadas,
 SKU em branco é gerado (`AFT-0001…`), fotos são validadas como no painel. Código em `src/server/importacao*.ts`.
+
+## Fase 3 — loja ligada ao banco
+
+A loja pública agora lê do banco; o protótipo com dados de exemplo foi removido.
+
+- **Vitrine:** home (categorias do banco, Novidades, Em destaque, Mais vendidos — cada seção some quando está vazia), categorias com subcategorias,
+  `/loja`, `/lancamentos`, busca. Filtros (disponibilidade, cor, promoção), ordenação e paginação ficam na **URL** (funcionam sem JavaScript e podem ser compartilhados).
+- **Regras** (`src/lib/preco.ts`, testadas): variação pode ter preço próprio; promoção só vale se for menor que o preço; pronta entrega exige estoque, sob encomenda não;
+  limite de 20 por item; o estoque exato nunca vai para o navegador (só "restam N" quando ≤ 3).
+- **Produto:** cor/tamanho com disponibilidade por opção, foto por variação, personalização, "Comprar agora"/"Adicionar ao carrinho", compartilhar, WhatsApp (só se configurado),
+  dados estruturados `Product` (JSON-LD), canonical, Open Graph.
+- **Carrinho** (`src/server/carrinho.ts`): persistente no banco, por cookie `httpOnly` com token aleatório (no banco só o hash), 30 dias. **Preços e disponibilidade sempre vêm do banco.**
+  Mesmo produto com personalizações diferentes = linhas diferentes. Itens que esgotam/despublicam são sinalizados, saem do total e há "Ajustar carrinho".
+- **Favoritos:** ficam no aparelho (localStorage) até existir login de cliente.
+- **Busca:** índice normalizado (sem acento/maiúscula), casa no início das palavras, curingas (`%`, `_`) neutralizados.
+- **SEO:** `sitemap.xml` (só produtos/categorias/páginas publicados), `robots.txt` (bloqueia tudo enquanto `NEXT_PUBLIC_INDEXAR` ≠ `true`), páginas de busca/filtros/carrinho não indexadas.
+- **Páginas institucionais** vêm do banco (`PaginaInstitucional`, texto simples) e só aparecem quando publicadas.
+
+**Ainda NÃO existe (próximas fases):** cálculo de frete por CEP, cadastro/login de cliente, checkout real (a tela é ilustrativa e usa o subtotal real do carrinho),
+pagamento, edição de banners/páginas/cupons no painel, avaliações, recuperação de carrinho.
+
+Testes: `npm test` (113+ testes, incluindo regras de preço, catálogo público, busca, carrinho e importador). Capturas em `docs/loja/` (dados **fictícios** de desenvolvimento).

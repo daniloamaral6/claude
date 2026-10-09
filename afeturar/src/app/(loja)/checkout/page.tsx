@@ -1,13 +1,20 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { PrototipoAviso } from "@/components/PrototipoAviso";
+import { lerCarrinho } from "@/server/carrinho";
+import { tokenDoCarrinho } from "@/server/carrinho-cookie";
 import { CheckoutView } from "./CheckoutView";
 
-export const metadata = { title: "Finalizar compra" };
+export const metadata: Metadata = { title: "Finalizar compra", robots: { index: false, follow: false } };
+export const dynamic = "force-dynamic";
 
-export default function Page() {
+export default async function Checkout() {
+  const c = await lerCarrinho(await tokenDoCarrinho());
+  if (c.linhas.length === 0 || c.temProblemas) redirect("/carrinho");
   return (
     <>
-      <PrototipoAviso>Fluxo ilustrativo: nenhum dado é enviado e nenhum pagamento é processado.</PrototipoAviso>
-      <CheckoutView />
+      <PrototipoAviso>Etapa em construção: o fluxo abaixo é ilustrativo. Nenhum dado é enviado e nenhum pagamento é processado.</PrototipoAviso>
+      <CheckoutView subtotalCentavos={c.subtotalCentavos} />
     </>
   );
 }

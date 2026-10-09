@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FotoPlaceholder } from "./FotoPlaceholder";
+import Image from "next/image";
 import { Icone } from "./Icones";
 
 export interface Slide {
@@ -29,8 +29,9 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
 
   return (
     <section aria-roledescription="carrossel" aria-label="Destaques" className="relative isolate overflow-hidden bg-creme-profundo">
-      <FotoPlaceholder legenda="Foto de ambiente (a fornecer)" className="absolute inset-0 -z-20 size-full" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-creme-profundo via-creme-profundo/85 to-transparent" aria-hidden />
+      {/* Enquanto não há foto de ambiente, o símbolo da marca ocupa o fundo (troque por foto real via banner). */}
+      <Image src="/brand/simbolo-transparente.webp" alt="" aria-hidden width={760} height={507} priority className="absolute -right-10 top-1/2 -z-20 hidden w-[52%] max-w-3xl -translate-y-1/2 opacity-[0.14] lg:block" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-creme-profundo via-creme-profundo/90 to-creme-profundo/40" aria-hidden />
 
       <div className="container-loja flex min-h-[26rem] flex-col justify-center gap-8 py-12 lg:min-h-[30rem]">
         <div role="group" aria-roledescription="slide" aria-label={`${i + 1} de ${slides.length}`} aria-live="polite" className="max-w-xl">
