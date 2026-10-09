@@ -63,3 +63,37 @@ com pessoas, fotos, o logotipo em letras e a frase cursiva. A faixa de avisos us
 (`avisosTopo` em `src/lib/site.ts`); o valor mínimo de frete grátis está **a configurar**.
 Títulos em serifa do sistema (`--font-serif`) são proposta a partir do layout, não a fonte da marca.
 Depoimentos: só reais e autorizados; hoje são espaços reservados. Novas rotas: `/loja` e `/lancamentos`.
+
+## Fase 1 — banco de dados (PostgreSQL + Prisma 7)
+
+**Modelo** (`prisma/schema.prisma`, 22 tabelas): catálogo (categorias com subcategorias, produtos, cores, variações com
+SKU/preço/estoque/prazo próprios, imagens, campos de personalização), pessoas (usuários com papéis CLIENTE/EQUIPE/ADMIN,
+endereços, favoritos), carrinho (de usuário ou visitante), cupons, pedidos com os 7 status + histórico, pagamentos,
+eventos de webhook (idempotência), configurações editáveis, banners, páginas institucionais, newsletter (com consentimento)
+e log de auditoria.
+
+**Decisões**
+- Dinheiro em **centavos (Int)**, nunca float.
+- Pedido guarda **snapshot** (nome, SKU, preço, endereço): mudar o catálogo não altera pedidos antigos.
+- Sem dados de cartão: o pagamento é tokenizado pelo Mercado Pago.
+- Regras de integridade também **no banco** (migração SQL): estoque ≥ 0, promoção < preço, total do pedido = subtotal − desconto + frete,
+  quantidade > 0, cupom em maiúsculas e percentual 1–100, um endereço padrão por usuário, variação única por produto+cor+tamanho.
+- Pagamento único por `(provedor, idExterno)` e webhook único por `(provedor, idEvento)`: impede processar duas vezes.
+- O seed (`prisma/seed-base.ts`) cria só dados reais e idempotentes: 7 categorias, 11 cores do briefing, 8 páginas
+  institucionais **como rascunho vazio** e configurações com `null` onde falta informação (WhatsApp, e-mail, CNPJ, CEP de origem, frete grátis).
+  **Não cria produtos, preços, pedidos nem contatos.**
+
+**Rodando localmente**
+```
+cp .env.example .env        # ajuste DATABASE_URL (PostgreSQL 15+)
+npm install                 # gera o cliente do Prisma (postinstall)
+npm run db:migrate          # aplica as migrações
+npm run db:seed             # dados-base
+npm test                    # testes do banco (usa TEST_DATABASE_URL, padrão afeturar_test em 127.0.0.1:5433)
+```
+
+**Produção (Fase 2):** PostgreSQL gerenciado (Neon ou Supabase) com backups automáticos; `DATABASE_URL` só como variável de ambiente.
+
+**Aviso de dependências:** `npm audit` aponta itens em `mysql2` e `deepmerge-ts`, que vêm da **CLI do `prisma`** (ferramenta de
+desenvolvimento/migração). A loja usa PostgreSQL e não carrega `mysql2`. A correção sugerida pelo npm rebaixaria o Prisma para a v6
+(mudança incompatível), então não foi aplicada; reavaliar a cada atualização do Prisma.

@@ -1,0 +1,469 @@
+// Modelo de dados da loja Afeturar (Fase 1).
+//
+// Convenções:
+//  - Valores monetários em CENTAVOS (Int, BRL). Nunca usar float para dinheiro.
+//  - Pedidos guardam SNAPSHOT dos dados (nome, SKU, preço, endereço): editar o catálogo depois
+//    não altera pedidos já feitos.
+//  - Nada de dados de cartão: o pagamento é tokenizado pelo Mercado Pago.
+//  - Regras que o Prisma não expressa (CHECK de estoque/preço) ficam na migração SQL.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────── Catálogo ─────────────────────────
+
+model Categoria {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  nome        String
+  descricao   String?
+  imagemUrl   String?
+  ordem       Int         @default(0)
+  ativa       Boolean     @default(true)
+  paiId       String?
+  pai         Categoria?  @relation("Subcategorias", fields: [paiId], references: [id], onDelete: Restrict)
+  filhas      Categoria[] @relation("Subcategorias")
+  produtos    Produto[]
+  criadoEm    DateTime    @default(now())
+  atualizadoEm DateTime   @updatedAt
+
+  @@index([paiId])
+}
+
+enum TipoProduto {
+  PRONTA_ENTREGA // item pronto para envio
+  SOB_ENCOMENDA  // exige prazo adicional de preparo
+}
+
+model Produto {
+  id                 String      @id @default(cuid())
+  slug               String      @unique
+  nome               String
+  descricao          String?
+  caracteristicas    String[]    @default([])
+  material           String?
+  cuidados           String?
+  tipo               TipoProduto @default(PRONTA_ENTREGA)
+  ativo              Boolean     @default(false) // nasce como rascunho
+  destaque           Boolean     @default(false)
+  personalizavel     Boolean     @default(false)
+
+  // Preço base e promoção (centavos). Variações podem sobrescrever o preço.
+  precoCentavos            Int
+  precoPromocionalCentavos Int?
+
+  // Dimensões do produto (mm) — informadas pelo cadastro, nunca estimadas.
+  larguraMm      Int?
+  alturaMm       Int?
+  profundidadeMm Int?
+
+  // Embalagem para cálculo de frete.
+  pesoEmbalagemG   Int?
+  compEmbalagemMm  Int?
+  largEmbalagemMm  Int?
+  altEmbalagemMm   Int?
+
+  prazoPreparoDias Int @default(0) // dias úteis; 0 = envio imediato
+
+  seoTitulo     String?
+  seoDescricao  String?
+
+  categoriaId String
+  categoria   Categoria @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+
+  variacoes   Variacao[]
+  imagens     ProdutoImagem[]
+  opcoesPersonalizacao OpcaoPersonalizacao[]
+  favoritos   Favorito[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([categoriaId, ativo])
+  @@index([destaque, ativo])
+}
+
+/// Cadastro de cores. Novas cores se criam no painel, sem alterar código.
+model Cor {
+  id        String     @id @default(cuid())
+  slug      String     @unique
+  nome      String
+  hex       String? // mostruário na interface; não é cor oficial do produto
+  ativa     Boolean    @default(true)
+  variacoes Variacao[]
+}
+
+model Variacao {
+  id        String   @id @default(cuid())
+  produtoId String
+  produto   Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  sku       String   @unique
+  corId     String?
+  cor       Cor?     @relation(fields: [corId], references: [id], onDelete: Restrict)
+  tamanho   String?
+
+  precoCentavos            Int? // null = usa o preço do produto
+  precoPromocionalCentavos Int?
+  estoque                  Int     @default(0)
+  prazoPreparoDias         Int? // null = usa o prazo do produto
+  disponivel               Boolean @default(true)
+  ativa                    Boolean @default(true)
+
+  imagens     ProdutoImagem[]
+  itensCarrinho ItemCarrinho[]
+  itensPedido   ItemPedido[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([produtoId])
+}
+
+model ProdutoImagem {
+  id         String    @id @default(cuid())
+  produtoId  String
+  produto    Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  variacaoId String?
+  variacao   Variacao? @relation(fields: [variacaoId], references: [id], onDelete: SetNull)
+  url        String
+  alt        String
+  ordem      Int       @default(0)
+
+  @@index([produtoId, ordem])
+}
+
+enum TipoCampo {
+  TEXTO
+  TEXTO_LONGO
+}
+
+model OpcaoPersonalizacao {
+  id            String    @id @default(cuid())
+  produtoId     String
+  produto       Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  rotulo        String
+  tipo          TipoCampo @default(TEXTO)
+  obrigatoria   Boolean   @default(false)
+  maxCaracteres Int       @default(60)
+  ordem         Int       @default(0)
+
+  @@index([produtoId])
+}
+
+// ───────────────────────── Pessoas ─────────────────────────
+
+enum Papel {
+  CLIENTE
+  EQUIPE // acesso limitado ao painel
+  ADMIN
+}
+
+model Usuario {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  nome        String?
+  telefone    String?
+  senhaHash   String? // null para contas sem senha (login social futuro)
+  papel       Papel    @default(CLIENTE)
+  ativo       Boolean  @default(true)
+  emailVerificadoEm DateTime?
+  aceitouTermosEm   DateTime? // LGPD: registro de consentimento
+
+  enderecos   Endereco[]
+  carrinhos   Carrinho[]
+  favoritos   Favorito[]
+  pedidos     Pedido[]
+  historicoAlteracoes HistoricoStatusPedido[]
+  logs        LogAuditoria[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+model Endereco {
+  id          String  @id @default(cuid())
+  usuarioId   String
+  usuario     Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  apelido     String?
+  destinatario String
+  cep         String
+  logradouro  String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  uf          String
+  padrao      Boolean @default(false)
+
+  @@index([usuarioId])
+}
+
+model Favorito {
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  produtoId String
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  criadoEm  DateTime @default(now())
+
+  @@id([usuarioId, produtoId])
+}
+
+// ───────────────────────── Carrinho ─────────────────────────
+
+model Carrinho {
+  id        String   @id @default(cuid())
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  /// Token aleatório (cookie httpOnly) para visitantes. Guardar apenas o hash no uso real.
+  tokenVisitante String? @unique
+  itens     ItemCarrinho[]
+  expiraEm  DateTime?
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([usuarioId])
+}
+
+model ItemCarrinho {
+  id         String   @id @default(cuid())
+  carrinhoId String
+  carrinho   Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
+  variacaoId String
+  variacao   Variacao @relation(fields: [variacaoId], references: [id], onDelete: Cascade)
+  quantidade Int      @default(1)
+  /// { "<opcaoId>": "texto digitado" }
+  personalizacao Json?
+
+  @@index([carrinhoId])
+}
+
+// ───────────────────────── Comercial ─────────────────────────
+
+enum TipoCupom {
+  PERCENTUAL
+  VALOR_FIXO
+  FRETE_GRATIS
+}
+
+model Cupom {
+  id             String    @id @default(cuid())
+  codigo         String    @unique // armazenado em MAIÚSCULAS
+  tipo           TipoCupom
+  /// PERCENTUAL: 1–100. VALOR_FIXO: centavos. FRETE_GRATIS: ignorado.
+  valor          Int       @default(0)
+  minimoCentavos Int?
+  usoMaximo      Int?
+  usos           Int       @default(0)
+  inicioEm       DateTime?
+  fimEm          DateTime?
+  ativo          Boolean   @default(true)
+  pedidos        Pedido[]
+  criadoEm       DateTime  @default(now())
+}
+
+// ───────────────────────── Pedidos ─────────────────────────
+
+enum StatusPedido {
+  AGUARDANDO_PAGAMENTO
+  PAGAMENTO_APROVADO
+  EM_PREPARACAO
+  PRONTO_PARA_ENVIO
+  ENVIADO
+  ENTREGUE
+  CANCELADO
+}
+
+model Pedido {
+  id      String @id @default(cuid())
+  numero  Int    @unique @default(autoincrement())
+  status  StatusPedido @default(AGUARDANDO_PAGAMENTO)
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  // Contato (compra como visitante)
+  email     String
+  nome      String
+  telefone  String?
+
+  // Valores (centavos), calculados e validados no servidor.
+  subtotalCentavos Int
+  descontoCentavos Int @default(0)
+  freteCentavos    Int @default(0)
+  totalCentavos    Int
+
+  cupomId     String?
+  cupom       Cupom?  @relation(fields: [cupomId], references: [id], onDelete: SetNull)
+  cupomCodigo String? // snapshot
+
+  // Endereço de entrega (snapshot)
+  entregaDestinatario String
+  entregaCep          String
+  entregaLogradouro   String
+  entregaNumero       String
+  entregaComplemento  String?
+  entregaBairro       String
+  entregaCidade       String
+  entregaUf           String
+
+  // Frete e prazos
+  freteServico         String? // ex.: nome da modalidade retornada pelo Melhor Envio
+  fretePrazoDias       Int?
+  prazoPreparoDias     Int     @default(0)
+  codigoRastreio       String?
+  enviadoEm            DateTime?
+  entregueEm           DateTime?
+
+  observacao String?
+  aceitouTermosEm DateTime
+
+  itens      ItemPedido[]
+  pagamentos Pagamento[]
+  historico  HistoricoStatusPedido[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([status, criadoEm])
+  @@index([usuarioId])
+  @@index([email])
+}
+
+model ItemPedido {
+  id         String   @id @default(cuid())
+  pedidoId   String
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  variacaoId String?
+  variacao   Variacao? @relation(fields: [variacaoId], references: [id], onDelete: SetNull)
+
+  // Snapshot
+  nomeProduto   String
+  sku           String
+  corNome       String?
+  tamanho       String?
+  precoUnitarioCentavos Int
+  quantidade    Int
+  personalizacao Json?
+
+  @@index([pedidoId])
+}
+
+model HistoricoStatusPedido {
+  id        String        @id @default(cuid())
+  pedidoId  String
+  pedido    Pedido        @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  de        StatusPedido?
+  para      StatusPedido
+  nota      String?
+  autorId   String?
+  autor     Usuario?      @relation(fields: [autorId], references: [id], onDelete: SetNull)
+  criadoEm  DateTime      @default(now())
+
+  @@index([pedidoId, criadoEm])
+}
+
+// ───────────────────────── Pagamentos ─────────────────────────
+
+enum MetodoPagamento {
+  PIX
+  CARTAO
+}
+
+enum StatusPagamento {
+  PENDENTE
+  APROVADO
+  RECUSADO
+  CANCELADO
+  ESTORNADO
+}
+
+model Pagamento {
+  id          String          @id @default(cuid())
+  pedidoId    String
+  pedido      Pedido          @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  provedor    String          @default("MERCADO_PAGO")
+  /// ID do pagamento no provedor. Único por provedor: impede registrar o mesmo pagamento duas vezes.
+  idExterno   String?
+  metodo      MetodoPagamento
+  status      StatusPagamento @default(PENDENTE)
+  valorCentavos Int
+  parcelas    Int?
+  pixCopiaECola String?
+  pixExpiraEm DateTime?
+  criadoEm     DateTime       @default(now())
+  atualizadoEm DateTime       @updatedAt
+
+  @@unique([provedor, idExterno])
+  @@index([pedidoId])
+}
+
+/// Idempotência de webhooks: cada evento recebido é registrado uma única vez.
+model EventoWebhook {
+  id          String    @id @default(cuid())
+  provedor    String
+  idEvento    String
+  tipo        String?
+  payload     Json
+  recebidoEm  DateTime  @default(now())
+  processadoEm DateTime?
+  erro        String?
+
+  @@unique([provedor, idEvento])
+}
+
+// ───────────────────────── Conteúdo e configuração ─────────────────────────
+
+/// Configurações editáveis no painel (WhatsApp, redes, frete grátis, CEP de origem…). Chave → JSON.
+model Configuracao {
+  chave        String   @id
+  valor        Json
+  atualizadoEm DateTime @updatedAt
+}
+
+model Banner {
+  id        String  @id @default(cuid())
+  titulo    String
+  subtitulo String?
+  imagemUrl String?
+  link      String?
+  textoBotao String?
+  ordem     Int     @default(0)
+  ativo     Boolean @default(true)
+  inicioEm  DateTime?
+  fimEm     DateTime?
+}
+
+model PaginaInstitucional {
+  slug      String   @id
+  titulo    String
+  conteudo  String
+  publicada Boolean  @default(false) // textos jurídicos só publicam após revisão
+  atualizadoEm DateTime @updatedAt
+}
+
+model InscritoNewsletter {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  consentimentoEm DateTime
+  origem        String?
+  canceladoEm   DateTime?
+}
+
+model LogAuditoria {
+  id         String   @id @default(cuid())
+  usuarioId  String?
+  usuario    Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  acao       String
+  entidade   String
+  entidadeId String?
+  dados      Json?
+  criadoEm   DateTime @default(now())
+
+  @@index([entidade, entidadeId])
+  @@index([criadoEm])
+}
