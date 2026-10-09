@@ -97,3 +97,35 @@ npm test                    # testes do banco (usa TEST_DATABASE_URL, padrão af
 **Aviso de dependências:** `npm audit` aponta itens em `mysql2` e `deepmerge-ts`, que vêm da **CLI do `prisma`** (ferramenta de
 desenvolvimento/migração). A loja usa PostgreSQL e não carrega `mysql2`. A correção sugerida pelo npm rebaixaria o Prisma para a v6
 (mudança incompatível), então não foi aplicada; reavaliar a cada atualização do Prisma.
+
+## Fase 2 — painel administrativo real (banco local)
+
+Substitui o protótipo do admin por um painel que lê e grava no banco. A loja pública ainda usa dados de exemplo (Fase 3).
+
+**Rodando**
+```
+npm run db:migrate && npm run db:seed
+ADMIN_EMAIL=voce@exemplo.com ADMIN_SENHA='uma senha forte' npm run admin:criar   # não existe usuário padrão
+npm run dev        # painel em http://localhost:3000/admin
+```
+A senha não é gravada em arquivo. Política: 10+ caracteres, sem conter o e-mail.
+
+**O que o painel faz:** login; dashboard com indicadores reais (faturamento só de pedidos pagos); produtos (rascunho → fotos → publicar,
+variações com SKU/preço/estoque/prazo, personalização, dimensões, embalagem, SEO); fotos (JPG/PNG/WebP até 5 MB, ordem, principal);
+categorias e subcategorias; cores (novas cores sem código); pedidos (7 status com fluxo permitido, rastreio, histórico);
+configurações (WhatsApp, e-mail, CNPJ validado, redes, CEP de origem, frete grátis). Papéis: ADMIN (tudo) e EQUIPE (sem Configurações).
+
+**Segurança**
+- Senhas com scrypt (custo 2^15) e comparação em tempo constante; mensagem de erro genérica; bloqueio de 15 min após 5 falhas.
+- Sessão no banco guardando só o **hash** do token; cookie `httpOnly`, `SameSite=Lax`, `Secure` + prefixo `__Host-` em produção; expira em 7 dias; desativar a conta derruba as sessões.
+- Duas barreiras: `proxy.ts` (sem cookie → login) e `exigirPainel()` em **toda** página e ação (valida no banco e no papel).
+- Todos os dados são revalidados no servidor (zod + regras de negócio + CHECK no banco). Server Actions já conferem a origem da requisição (proteção CSRF do Next).
+- Upload: tipo detectado pelo **conteúdo** (não pelo nome), limite de 5 MB, nome aleatório, SVG/HTML recusados, entrega com `nosniff` e CSP restritiva, sem navegação de pastas.
+- Cabeçalhos de segurança (`X-Frame-Options`, `nosniff`, `Referrer-Policy`) e `Cache-Control: no-store` no painel; log de auditoria das alterações.
+
+**Limites conhecidos (a tratar antes da publicação):** fotos ficam em disco local (`storage/`, ignorado pelo git) — em produção usar Cloudflare R2/Cloudinary
+(trocar apenas `src/server/armazenamento.ts`); o bloqueio de login é por conta (adicionar limite por IP/CDN na publicação); autenticação em dois fatores e
+recuperação de senha ficam para depois; cancelar pedido ainda não devolve estoque (entra com o checkout, Fase 4).
+
+**Testes:** `npm test` — 84 testes automatizados (regras do banco, login/sessão, produtos, fotos, pedidos, configurações, formulários).
+Os testes e2e do navegador foram executados manualmente com Playwright; capturas em `docs/painel/` (dados de teste, não reais).
