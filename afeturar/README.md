@@ -18,12 +18,13 @@ npm run build && npm run typecheck && npm run lint
 
 | Item | Status |
 |---|---|
-| Logo `public/brand/logo-afeturar.jpeg` | Arquivo do kit, **sem alteração**. JPEG 1254×1254 com fundo opaco; não é vetor nem transparente; aprovação como versão final não comprovada |
+| Logo `public/brand/logo-circular.webp` | Enviado pela cliente, **sem alteração**. WebP 1254×1254 com fundo opaco (cantos brancos); mesma arte do JPEG do kit (só muda a compressão); não é vetor |
+| Símbolo `public/brand/simbolo-transparente.webp` | Enviado pela cliente, **sem alteração**. WebP 1536×1024 com **fundo transparente** (A + coração + cubo, sem o nome) |
 | Cores `--color-creme/marrom/terracota-escuro/terracota/cobre` | **Aproximadas**, medidas no JPEG; não são oficiais (`src/app/globals.css`) |
 | Cores `creme-profundo`, `linha`, `marrom-suave`, `acao-hover`, `erro` | **Proposta nova** deste projeto |
 | Slogan "Dê forma ao que você sente." | Observado no logo |
 | Tipografia | Fonte da marca **não identificada**. Usamos a pilha de fontes do sistema (proposta provisória) |
-| Favicon / ícone de app | **Não criado** (falta arquivo adequado) |
+| Favicon / ícone de app | `src/app/icon.png` e `apple-icon.png` **gerados a partir do símbolo enviado** (apenas recorte da área visível e centralização em tela quadrada; o desenho não foi alterado). **Proposta** — sujeita à aprovação |
 | Foto de ambiente, fotos de produtos | **Faltam**; não usamos as capturas do kit |
 
 Contraste medido (WCAG): marrom/creme 12,3:1; creme sobre terracota escuro (botão) 6,9:1 (AA);
@@ -33,7 +34,7 @@ O logo é exibido recortado em círculo por CSS (`rounded-full`) para esconder o
 o arquivo não é modificado, e o recorte fica fora do anel do desenho.
 
 ## Pendências de arquivos
-Logo vetorial/PNG transparente, tipografia da marca, manual/paleta oficial, fotos reais, número de WhatsApp,
+Logo em vetor (SVG), tipografia da marca, manual/paleta oficial, fotos reais, número de WhatsApp,
 dados da empresa (CNPJ, endereço, e-mail). Dados editáveis ficam em `src/lib/site.ts` (no MVP irão para o painel).
 
 ## Etapa 2 — telas de protótipo (catálogo, produto, carrinho, checkout, admin)

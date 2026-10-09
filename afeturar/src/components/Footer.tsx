@@ -35,7 +35,7 @@ export function Footer() {
     <footer className="mt-20 border-t border-linha bg-creme-profundo">
       <div className="container-loja grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.1fr_1fr_1fr_1.6fr_1fr]">
         <div>
-          <Image src="/brand/logo-afeturar.jpeg" alt="Afeturar — Dê forma ao que você sente" width={120} height={120} className="size-28 rounded-full" />
+          <Image src="/brand/logo-circular.webp" alt="Afeturar — Dê forma ao que você sente" width={120} height={120} className="size-28 rounded-full" />
         </div>
         <Coluna titulo="Institucional" itens={institucional} />
         <Coluna titulo="Minha conta" itens={conta} />

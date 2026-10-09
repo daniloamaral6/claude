@@ -16,7 +16,7 @@ export default async function PainelLayout({ children }: { children: React.React
     <div className="flex min-h-screen flex-col lg:flex-row">
       <aside className="border-b border-linha bg-creme-profundo lg:w-60 lg:shrink-0 lg:border-b-0 lg:border-r">
         <div className="flex items-center gap-3 p-4">
-          <Image src="/brand/logo-afeturar.jpeg" alt="Afeturar" width={48} height={48} className="size-12 rounded-full" />
+          <Image src="/brand/logo-circular.webp" alt="Afeturar" width={48} height={48} className="size-12 rounded-full" />
           <span className="text-sm font-semibold tracking-widest">PAINEL</span>
         </div>
         <AdminNav ehAdmin={usuario.papel === "ADMIN"} />

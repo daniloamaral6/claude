@@ -41,7 +41,7 @@ export function Header({ carrinhoQtd = 0 }: { carrinhoQtd?: number }) {
         </button>
 
         <Link href="/" aria-label="Afeturar — início" className="shrink-0">
-          <Image src="/brand/logo-afeturar.jpeg" alt="Afeturar — Dê forma ao que você sente" width={72} height={72} priority className="size-14 rounded-full sm:size-[68px]" />
+          <Image src="/brand/logo-circular.webp" alt="Afeturar — Dê forma ao que você sente" width={72} height={72} priority className="size-14 rounded-full sm:size-[68px]" />
         </Link>
 
         <nav aria-label="Principal" className="hidden flex-1 justify-center lg:flex">
