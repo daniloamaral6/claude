@@ -180,6 +180,7 @@ model Usuario {
   falhasLogin       Int       @default(0) // tentativas seguidas com senha errada
   bloqueadoAte      DateTime? // bloqueio temporário após muitas falhas
   sessoes     Sessao[]
+  recuperacoes RecuperacaoSenha[]
 
   enderecos   Endereco[]
   carrinhos   Carrinho[]
@@ -205,6 +206,19 @@ model Sessao {
 
   @@index([usuarioId])
   @@index([expiraEm])
+}
+
+/// Link de redefinição de senha: guardamos só o hash do token; expira rápido e só vale uma vez.
+model RecuperacaoSenha {
+  id        String    @id @default(cuid())
+  usuarioId String
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiraEm  DateTime
+  usadoEm   DateTime?
+  criadoEm  DateTime  @default(now())
+
+  @@index([usuarioId])
 }
 
 model Endereco {
@@ -345,6 +359,19 @@ model Pedido {
   observacao String?
   aceitouTermosEm DateTime
 
+  /// CPF do comprador (só números). Exigido pelo Mercado Pago e útil para a nota fiscal. Dado pessoal (LGPD): mostrar mascarado.
+  clienteDocumento String?
+  /// Identificação do serviço de frete no provedor (ex.: "melhor_envio:1").
+  freteServicoId   String?
+  /// Evita pedido duplicado se o cliente clicar duas vezes (gerada na tela de checkout).
+  chaveIdempotencia String? @unique
+  /// Código secreto para o visitante (sem conta) ver o próprio pedido pelo link.
+  tokenAcesso      String  @unique @default(cuid())
+  /// Pedido não pago é cancelado automaticamente depois deste horário (e o estoque volta).
+  expiraEm         DateTime?
+  /// Preenchido quando o estoque reservado foi devolvido (evita devolver duas vezes).
+  estoqueDevolvidoEm DateTime?
+
   itens      ItemPedido[]
   pagamentos Pagamento[]
   historico  HistoricoStatusPedido[]
@@ -372,6 +399,8 @@ model ItemPedido {
   precoUnitarioCentavos Int
   quantidade    Int
   personalizacao Json?
+  /// Pronta entrega: o estoque foi baixado ao criar o pedido (e volta se o pedido for cancelado). Sob encomenda: false.
+  reservouEstoque Boolean @default(false)
 
   @@index([pedidoId])
 }
@@ -417,7 +446,10 @@ model Pagamento {
   valorCentavos Int
   parcelas    Int?
   pixCopiaECola String?
+  pixQrBase64   String?
   pixExpiraEm DateTime?
+  /// Motivo informado pelo provedor (ex.: cc_rejected_insufficient_amount).
+  statusDetalhe String?
   criadoEm     DateTime       @default(now())
   atualizadoEm DateTime       @updatedAt
 

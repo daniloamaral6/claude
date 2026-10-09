@@ -114,7 +114,7 @@ export async function contarItens(token: string | null | undefined) {
 }
 
 export interface LinhaCarrinho {
-  itemId: string; quantidade: number; quantidadeMaxima: number;
+  itemId: string; variacaoId: string; produtoId: string; quantidade: number; quantidadeMaxima: number;
   produto: { nome: string; slug: string; tipo: TipoProduto; imagemUrl: string | null; imagemAlt: string };
   variacao: { sku: string; cor: string | null; tamanho: string | null };
   precoUnitarioCentavos: number; precoOriginalCentavos: number | null; subtotalCentavos: number;
@@ -139,7 +139,7 @@ export async function lerCarrinho(token: string | null | undefined): Promise<Car
     const problema = !vendavel ? "Indisponível no momento" : i.quantidade > max ? `Só temos ${max} ${max === 1 ? "unidade" : "unidades"}` : null;
     const pers = (i.personalizacao ?? {}) as Personalizacao;
     return {
-      itemId: i.id, quantidade: i.quantidade, quantidadeMaxima: vendavel ? max : 0,
+      itemId: i.id, variacaoId: v.id, produtoId: p.id, quantidade: i.quantidade, quantidadeMaxima: vendavel ? max : 0,
       produto: { nome: p.nome, slug: p.slug, tipo: p.tipo, imagemUrl: p.imagens[0]?.url ?? null, imagemAlt: p.imagens[0]?.alt ?? p.nome },
       variacao: { sku: v.sku, cor: v.cor?.nome ?? null, tamanho: v.tamanho },
       precoUnitarioCentavos: preco.finalCentavos, precoOriginalCentavos: preco.promocionalCentavos ? preco.precoCentavos : null,

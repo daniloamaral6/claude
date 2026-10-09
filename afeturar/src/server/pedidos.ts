@@ -2,6 +2,9 @@ import type { StatusPedido } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { registrarAuditoria } from "./auditoria";
 import { ErroNegocio } from "./categorias";
+import { enviarEmailSeguro, type TransporteEmail, transporteDeEmail } from "./email";
+import { emailPedidoCancelado, emailPedidoEnviado } from "./email/modelos";
+import { liberarReservas, travarPedido } from "./reservas";
 
 export const NOME_STATUS: Record<StatusPedido, string> = {
   AGUARDANDO_PAGAMENTO: "Aguardando pagamento",
@@ -44,7 +47,7 @@ export const obterPedido = (id: string) =>
     include: { itens: true, pagamentos: { orderBy: { criadoEm: "desc" } }, historico: { orderBy: { criadoEm: "desc" }, include: { autor: { select: { nome: true, email: true } } } } },
   });
 
-export async function alterarStatusPedido(id: string, para: StatusPedido, autorId: string, extra: { nota?: string; codigoRastreio?: string } = {}) {
+export async function alterarStatusPedido(id: string, para: StatusPedido, autorId: string | null, extra: { nota?: string; codigoRastreio?: string } = {}, email: TransporteEmail | null = transporteDeEmail()) {
   const pedido = await db.pedido.findUnique({ where: { id } });
   if (!pedido) throw new ErroNegocio("Pedido não encontrado.");
   if (!TRANSICOES[pedido.status].includes(para))
@@ -55,14 +58,26 @@ export async function alterarStatusPedido(id: string, para: StatusPedido, autorI
   if (pedido.status === "AGUARDANDO_PAGAMENTO" && para === "PAGAMENTO_APROVADO" && !nota)
     throw new ErroNegocio("Aprovar o pagamento manualmente exige uma observação (o normal é a confirmação automática do Mercado Pago).");
 
-  await db.$transaction([
-    db.pedido.update({
+  await db.$transaction(async (tx) => {
+    await travarPedido(tx, id);
+    const atual = await tx.pedido.findUniqueOrThrow({ where: { id }, select: { status: true } });
+    if (atual.status !== pedido.status) throw new ErroNegocio("O pedido foi alterado por outra pessoa. Recarregue a página.");
+    await tx.pedido.update({
       where: { id },
       data: { status: para, ...(rastreio ? { codigoRastreio: rastreio } : {}), ...(para === "ENVIADO" ? { enviadoEm: new Date() } : {}), ...(para === "ENTREGUE" ? { entregueEm: new Date() } : {}) },
-    }),
-    db.historicoStatusPedido.create({ data: { pedidoId: id, de: pedido.status, para, nota, autorId } }),
-  ]);
-  await registrarAuditoria(autorId, "status-pedido", "Pedido", id, { de: pedido.status, para });
+    });
+    await tx.historicoStatusPedido.create({ data: { pedidoId: id, de: pedido.status, para, nota, autorId } });
+    if (para === "CANCELADO") await liberarReservas(tx, id); // estoque e cupom voltam
+  });
+  if (autorId) await registrarAuditoria(autorId, "status-pedido", "Pedido", id, { de: pedido.status, para });
+  if (para === "ENVIADO" || para === "CANCELADO") await notificarCliente(id, para, email);
+}
+
+async function notificarCliente(id: string, evento: "ENVIADO" | "CANCELADO", email: TransporteEmail | null) {
+  const p = await db.pedido.findUnique({ where: { id }, include: { itens: true } });
+  if (!p) return;
+  const dados = { numero: p.numero, nome: p.nome, email: p.email, totalCentavos: p.totalCentavos, subtotalCentavos: p.subtotalCentavos, descontoCentavos: p.descontoCentavos, freteCentavos: p.freteCentavos, tokenAcesso: p.tokenAcesso, codigoRastreio: p.codigoRastreio, freteServico: p.freteServico, itens: p.itens };
+  await enviarEmailSeguro(evento === "ENVIADO" ? emailPedidoEnviado(dados) : emailPedidoCancelado(dados, "O estoque foi liberado. Se você já pagou, o valor será estornado."), email);
 }
 
 export async function salvarRastreio(id: string, codigo: string, autorId: string) {
