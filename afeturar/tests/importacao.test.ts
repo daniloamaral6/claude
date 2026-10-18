@@ -37,6 +37,12 @@ describe("processarLinhas", () => {
     expect(p.fotos).toEqual([{ sku: "VASO-B", arquivo: "a.jpg" }, { sku: "VASO-B", arquivo: "b.jpg" }, { sku: "AFT-0001", arquivo: "c.jpg" }]);
   });
 
+  it("SKU automático pula os SKUs que já existem na loja", () => {
+    const r = processarLinhas([L(2, { ...base, cor: "Branco" })], { ...ref, skusExistentes: ["AFT-0001", "AFT-0002"] });
+    expect(r.erros).toEqual([]);
+    expect(r.produtos[0].entrada.variacoes[0].sku).toBe("AFT-0003");
+  });
+
   it("aponta cada erro na linha certa, sem parar nos primeiros", () => {
     const r = processarLinhas([
       L(2, { ...base, nome: "Sem categoria", categoria: "" }),

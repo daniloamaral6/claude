@@ -7,11 +7,12 @@ import { criarProduto, obterProduto } from "./produtos";
 import { normalizar, type Referencias, type ResultadoImportacao } from "./importacao";
 
 export async function carregarReferencias(): Promise<Referencias> {
-  const [categorias, cores] = await Promise.all([
+  const [categorias, cores, skus] = await Promise.all([
     db.categoria.findMany({ select: { id: true, nome: true } }),
     db.cor.findMany({ select: { id: true, nome: true } }),
+    db.variacao.findMany({ select: { sku: true } }),
   ]);
-  return { categorias, cores };
+  return { categorias, cores, skusExistentes: skus.map((v) => v.sku) };
 }
 
 export interface RelatorioAplicacao {

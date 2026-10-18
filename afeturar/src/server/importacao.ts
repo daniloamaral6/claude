@@ -10,6 +10,8 @@ export type Linha = { numero: number; celulas: Record<string, unknown> };
 export interface Referencias {
   categorias: { id: string; nome: string }[];
   cores: { id: string; nome: string }[];
+  /** SKUs já usados na loja: os SKUs gerados automaticamente pulam esses. */
+  skusExistentes?: string[];
 }
 export interface ProdutoImportado {
   linha: number;
@@ -75,7 +77,7 @@ export function processarLinhas(linhas: Linha[], ref: Referencias): ResultadoImp
   const res: ResultadoImportacao = { produtos: [], erros: [], avisos: [], ignorados: [] };
   const catPorNome = new Map(ref.categorias.map((c) => [normalizar(c.nome), c.id]));
   const corPorNome = new Map(ref.cores.map((c) => [normalizar(c.nome), c.id]));
-  const skusVistos = new Set<string>();
+  const skusVistos = new Set<string>(ref.skusExistentes ?? []);
   let seq = 0;
 
   // Agrupa por nome do produto (linhas de variação seguem a primeira).
