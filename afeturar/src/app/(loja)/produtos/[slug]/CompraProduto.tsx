@@ -48,8 +48,10 @@ export function CompraProduto({ dados }: { dados: DadosCompra }) {
   const trocou = (id: string) => {
     const v = variacoes.find((x) => x.id === id)!;
     setQtd((q) => Math.max(1, Math.min(q, v.quantidadeMaxima || 1)));
+    // foto da própria variação; senão, a foto de outra variação da mesma cor
     const i = imagens.findIndex((im) => im.variacaoId === id);
-    if (i >= 0) setFoto(i);
+    const daCor = i >= 0 || !v.corSlug ? i : imagens.findIndex((im) => im.variacaoId && variacoes.find((x) => x.id === im.variacaoId)?.corSlug === v.corSlug);
+    if (daCor >= 0) setFoto(daCor);
   };
 
   const max = atual?.quantidadeMaxima ?? 1;

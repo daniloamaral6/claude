@@ -3,7 +3,7 @@ import { registrarAuditoria } from "./auditoria";
 import { apagarImagem, salvarImagem } from "./armazenamento";
 import { ErroNegocio } from "./categorias";
 
-export const MAX_IMAGENS_POR_PRODUTO = 10;
+export const MAX_IMAGENS_POR_PRODUTO = 24;
 
 export async function adicionarImagem(produtoId: string, arquivo: Buffer, alt: string, variacaoId: string | null, autorId: string) {
   const produto = await db.produto.findUnique({ where: { id: produtoId }, include: { imagens: true, variacoes: { select: { id: true } } } });
