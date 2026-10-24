@@ -32,6 +32,8 @@ Os nomes de menus podem mudar; se algo não bater com a tela, siga o sentido e m
 
 **Resultado da validação (24/10/2026):** Pix (QR e copia-e-cola, consulta) e cartão (aprovado, recusado e saldo insuficiente) funcionam contra a API de teste. As chaves usadas pareciam ser as da **aba Produção**: a API recusou pagamentos de teste até enviarmos o cabeçalho de teste (`MERCADO_PAGO_MODO_TESTE=true`). O correto é usar as credenciais da **aba Teste**, depois de clicar em **Ativar credenciais** no cartão "Credenciais de teste". Com elas, essa variável não é necessária.
 
+**E-mail do comprador nos testes:** em modo de teste a API responde `400 Invalid users involved` (código 2034) se o e-mail do pagador não for de um usuário de teste. Use e-mails como `test_user_123456@testuser.com` no checkout durante os testes; compradores reais não têm essa restrição em produção.
+
 ### 1.4 Webhook (avisa a loja quando o pagamento muda)
 Só dá para configurar depois que o site estiver no ar (precisa de endereço público).
 1. Na aplicação: **Webhooks → Configurar notificações.**
@@ -73,6 +75,8 @@ Pix (QR e copia-e-cola), cartão aprovado e recusado, parcelamento, pedido cance
 2. Gere um novo token de produção com a mesma permissão.
 3. Troque `MELHOR_ENVIO_TOKEN` e coloque `MELHOR_ENVIO_AMBIENTE=producao`.
 4. Para postar, **adicione saldo** na conta e compre a etiqueta pelo painel do Melhor Envio (a loja ainda não compra etiquetas sozinha).
+
+**Resultado da validação (24/10/2026, sandbox):** o token precisa ser o JWT completo (~1000 caracteres, escopo `shipping-calculate`). Cotação funcionou para SP, RJ, BH, Salvador, Manaus, Porto Velho e interior do AM, com 1, 3 e 5 unidades (PAC, SEDEX, Jadlog .Package e .Com). Frete grátis por valor (≥ R$ 299,00) e por cupom funcionam: a opção mais barata fica grátis e as demais cobram só a diferença. Observações: o sandbox não devolve todos os serviços para todos os CEPs (ex.: SP capital sem PAC); para destinos distantes a opção grátis pode ser a mais lenta (ex.: Manaus, 17 dias) — se preferir outra regra, é decisão de negócio.
 
 ### 2.4 O que eu testo
 Cotação para vários CEPs (capital, interior, longe), com kits de 3 e 5 unidades, frete grátis por valor e por cupom, e o comportamento quando o Melhor Envio fica fora do ar.

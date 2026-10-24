@@ -2,7 +2,8 @@ import { ErroFrete, type OpcaoFrete, type PacoteItem, type ProvedorFrete } from 
 
 /**
  * Cotação pelo Melhor Envio (POST /api/v2/me/shipment/calculate).
- * ATENÇÃO: implementado conforme a documentação pública; ainda NÃO validado contra a API real (precisa do token sandbox).
+ * Validado contra o SANDBOX real em 24/10/2026 (9 CEPs × 1/3/5 unidades): o corpo e o formato da resposta estavam corretos.
+ * O sandbox pode omitir serviços (ex.: PAC para SP capital) e devolve cotação até para CEP inexistente; o CEP é validado antes, pelo ViaCEP.
  * Unidades da API: dimensões em cm, peso em kg, valores em reais.
  */
 export interface OpcoesMelhorEnvio { token: string; ambiente?: "sandbox" | "producao"; emailContato: string; fetchImpl?: typeof fetch; timeoutMs?: number }

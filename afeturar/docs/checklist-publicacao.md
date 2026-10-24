@@ -8,7 +8,7 @@ Legenda: **[Você]** só você pode fazer · **[Eu]** posso fazer na sessão · 
 - [ ] **[Você]** Criar conta no Melhor Envio (sandbox primeiro) e gerar o token; depois a conta de produção com o CNPJ e o endereço de origem.
 - [ ] **[Você]** Criar conta no Resend (e-mails) e cadastrar o domínio.
 - [ ] **[Você]** Colocar as chaves nas **variáveis secretas** do ambiente (nunca no chat nem no Git).
-- [ ] **[Eu]** Testar de verdade em sandbox: Pix, cartão aprovado/recusado, cotação de frete, webhook. Corrigir o que as APIs reais mostrarem diferente (hoje só foi testado com respostas simuladas).
+- [ ] **[Eu]** Testar de verdade em sandbox: Pix, cartão aprovado/recusado, cotação de frete, webhook. **Feito:** Pix, cartão via API, cotação de frete e checkout completo com Pix. **Falta:** Brick de cartão no navegador (liberar `sdk.mercadopago.com` na rede do ambiente) e webhook (precisa de URL pública).
 - [ ] **[Eu]** Conferir a CSP com o formulário de cartão real (`next.config.ts`).
 - [ ] **[Juntos]** **Remover `MERCADO_PAGO_MODO_TESTE`** e trocar para as chaves de produção antes de abrir (com a variável ligada, nenhum pagamento real é cobrado).
 
