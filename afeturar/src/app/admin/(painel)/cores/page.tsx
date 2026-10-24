@@ -1,6 +1,7 @@
 import { exigirPainel } from "@/server/auth";
 import { listarCores } from "@/server/cores";
 import { FormCor } from "./FormCor";
+import { fundoCor } from "@/lib/cor";
 
 export const metadata = { title: "Cores" };
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ export default async function Cores() {
             <details className="rounded-[var(--radius-card)] border border-linha bg-white">
               <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-5 py-2">
                 <span className="flex items-center gap-3 font-medium">
-                  <span aria-hidden className="size-5 rounded-full border border-linha" style={{ background: c.hex ?? "linear-gradient(135deg,#f4f1ee,#b9b2ab)" }} />{c.nome}
+                  <span aria-hidden className="size-5 rounded-full border border-linha" style={{ background: fundoCor(c.hex) }} />{c.nome}
                 </span>
                 <span className="text-xs text-marrom-suave">{c.ativa ? "Ativa" : "Inativa"} · {c._count.variacoes} variação(ões)</span>
               </summary>

@@ -3,6 +3,7 @@ import type { CartaoProduto } from "@/server/catalogo";
 import { BotaoFavorito } from "./BotaoFavorito";
 import { FotoProduto } from "./FotoProduto";
 import { Preco } from "./Preco";
+import { fundoCor } from "@/lib/cor";
 
 export function ProdutoCard({ p, prioridade = false }: { p: CartaoProduto; prioridade?: boolean }) {
   return (
@@ -16,7 +17,7 @@ export function ProdutoCard({ p, prioridade = false }: { p: CartaoProduto; prior
       {p.cores.length > 0 && (
         <ul className="mt-2 flex gap-1" aria-label="Cores disponíveis">
           {p.cores.slice(0, 8).map((c) => (
-            <li key={c.slug} title={c.nome} className="size-4 rounded-full border border-linha" style={{ background: c.hex ?? "linear-gradient(135deg,#f4f1ee,#b9b2ab)" }}><span className="sr-only">{c.nome}</span></li>
+            <li key={c.slug} title={c.nome} className="size-4 rounded-full border border-linha" style={{ background: fundoCor(c.hex) }}><span className="sr-only">{c.nome}</span></li>
           ))}
         </ul>
       )}

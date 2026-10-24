@@ -79,7 +79,7 @@ export type CategoriaInput = z.infer<typeof categoriaSchema>;
 
 export const corSchema = z.object({
   nome: texto(40).min(2, "Informe o nome da cor."),
-  hex: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, "Cor no formato #RRGGBB.").nullable().optional().transform((v) => v || null),
+  hex: z.string().trim().regex(/^#[0-9a-fA-F]{6}(\/#[0-9a-fA-F]{6})?$/, "Cor no formato #RRGGBB (ou #RRGGBB/#RRGGBB para duas cores).").nullable().optional().transform((v) => v || null),
   ativa: z.boolean().default(true),
 });
 export type CorInput = z.infer<typeof corSchema>;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fundoCor } from "../src/lib/cor";
 import { centavosParaTexto, textoParaCentavos } from "../src/lib/moeda";
 import { slugify } from "../src/lib/slug";
 import { hashSenha, validarForcaSenha, verificarSenha } from "../src/server/senha";
@@ -43,5 +44,13 @@ describe("cnpj", () => {
     expect(cnpjValido("11222333000182")).toBe(false);
     expect(cnpjValido("11111111111111")).toBe(false);
     expect(cnpjValido("123")).toBe(false);
+  });
+});
+
+describe("fundoCor", () => {
+  it("usa a cor única, divide em duas ou cai no cinza quando não há cor", () => {
+    expect(fundoCor("#c1846f")).toBe("#c1846f");
+    expect(fundoCor("#111111/#c9a24a")).toBe("linear-gradient(135deg,#111111 50%,#c9a24a 50%)");
+    expect(fundoCor(null)).toContain("linear-gradient");
   });
 });

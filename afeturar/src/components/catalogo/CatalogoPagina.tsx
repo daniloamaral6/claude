@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ProdutoCard } from "@/components/ProdutoCard";
 import { coresDeProdutosPublicados, listarProdutosPublicos, type Ordem } from "@/server/catalogo";
 import { lerFiltros, type ParamsBusca } from "./filtros";
+import { fundoCor } from "@/lib/cor";
 
 interface Props {
   titulo: string;
@@ -47,7 +48,7 @@ export async function CatalogoPagina({ titulo, basePath, searchParams, categoria
           {cores.map((c) => (
             <label key={c.slug} className="flex min-h-9 items-center gap-2 text-sm">
               <input type="checkbox" name="cor" value={c.slug} defaultChecked={f.cores?.includes(c.slug)} className="size-4 accent-terracota-escuro" />
-              <span aria-hidden className="size-4 rounded-full border border-linha" style={{ background: c.hex ?? "linear-gradient(135deg,#f4f1ee,#b9b2ab)" }} />{c.nome}
+              <span aria-hidden className="size-4 rounded-full border border-linha" style={{ background: fundoCor(c.hex) }} />{c.nome}
             </label>
           ))}
         </fieldset>

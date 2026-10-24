@@ -8,6 +8,7 @@ import { Preco } from "@/components/Preco";
 import { textoPrazo, type TipoProduto } from "@/lib/preco";
 import type { Estado } from "@/server/acao";
 import { adicionarAoCarrinho } from "../../carrinho/actions";
+import { fundoCor } from "@/lib/cor";
 
 export interface DadosCompra {
   slug: string; nome: string; url: string; tipo: TipoProduto; personalizavel: boolean; whatsapp: string | null;
@@ -31,7 +32,14 @@ export function CompraProduto({ dados }: { dados: DadosCompra }) {
   const [corSel, setCorSel] = useState<string | null>(inicial?.corSlug ?? null);
   const [tamSel, setTamSel] = useState<string | null>(inicial?.tamanho ?? null);
   const [qtd, setQtd] = useState(1);
-  const [foto, setFoto] = useState(0);
+  // foto da própria variação; senão, a de outra variação da mesma cor; -1 se não houver
+  const indiceFoto = (id: string) => {
+    const v = variacoes.find((x) => x.id === id);
+    const i = imagens.findIndex((im) => im.variacaoId === id);
+    if (i >= 0 || !v?.corSlug) return i;
+    return imagens.findIndex((im) => im.variacaoId && variacoes.find((x) => x.id === im.variacaoId)?.corSlug === v.corSlug);
+  };
+  const [foto, setFoto] = useState(() => Math.max(0, inicial ? indiceFoto(inicial.id) : 0));
   const [aviso, setAviso] = useState("");
 
   const achar = (cor: string | null, tam: string | null) => variacoes.find((v) => v.corSlug === cor && v.tamanho === tam);
@@ -48,10 +56,8 @@ export function CompraProduto({ dados }: { dados: DadosCompra }) {
   const trocou = (id: string) => {
     const v = variacoes.find((x) => x.id === id)!;
     setQtd((q) => Math.max(1, Math.min(q, v.quantidadeMaxima || 1)));
-    // foto da própria variação; senão, a foto de outra variação da mesma cor
-    const i = imagens.findIndex((im) => im.variacaoId === id);
-    const daCor = i >= 0 || !v.corSlug ? i : imagens.findIndex((im) => im.variacaoId && variacoes.find((x) => x.id === im.variacaoId)?.corSlug === v.corSlug);
-    if (daCor >= 0) setFoto(daCor);
+    const i = indiceFoto(id);
+    if (i >= 0) setFoto(i);
   };
 
   const max = atual?.quantidadeMaxima ?? 1;
@@ -106,7 +112,7 @@ export function CompraProduto({ dados }: { dados: DadosCompra }) {
               {cores.map((c) => (
                 <label key={c.slug} className="relative">
                   <input type="radio" name="cor" value={c.slug} checked={corSel === c.slug} onChange={() => escolherCor(c.slug)} className="peer sr-only" />
-                  <span title={`${c.nome}${corDisponivel(c.slug) ? "" : " (indisponível)"}`} className={`block size-11 cursor-pointer rounded-full border border-linha ring-offset-2 ring-offset-creme peer-checked:ring-2 peer-checked:ring-terracota-escuro peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-terracota-escuro ${corDisponivel(c.slug) ? "" : "opacity-40"}`} style={{ background: c.hex ?? "linear-gradient(135deg,#f4f1ee,#b9b2ab)" }} />
+                  <span title={`${c.nome}${corDisponivel(c.slug) ? "" : " (indisponível)"}`} className={`block size-11 cursor-pointer rounded-full border border-linha ring-offset-2 ring-offset-creme peer-checked:ring-2 peer-checked:ring-terracota-escuro peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-terracota-escuro ${corDisponivel(c.slug) ? "" : "opacity-40"}`} style={{ background: fundoCor(c.hex) }} />
                   {!corDisponivel(c.slug) && <span aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center text-lg text-marrom">╱</span>}
                   <span className="sr-only">{c.nome}{corDisponivel(c.slug) ? "" : " (indisponível)"}</span>
                 </label>
