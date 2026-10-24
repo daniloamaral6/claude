@@ -14,8 +14,8 @@ const nextConfig: NextConfig = {
     ];
     if (process.env.NODE_ENV === "production") {
       // Só em produção (o modo de desenvolvimento do Next precisa de eval). Os domínios do Mercado Pago/ViaCEP são
-      // os necessários para o checkout; VALIDAR com o Brick de cartão real quando houver as chaves de teste.
-      const mp = "https://*.mercadopago.com https://*.mercadopago.com.br https://*.mercadolibre.com https://*.mlstatic.com";
+      // os necessários para o checkout; Validado em 24/10/2026 com o Brick real em build de produção (sem violações); o Brick também carrega imagens de mercadolivre.com.
+      const mp = "https://*.mercadopago.com https://*.mercadopago.com.br https://*.mercadolibre.com https://*.mercadolivre.com https://*.mlstatic.com";
       seguranca.push(
         { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
         {

@@ -9,7 +9,8 @@ Legenda: **[Você]** só você pode fazer · **[Eu]** posso fazer na sessão · 
 - [ ] **[Você]** Criar conta no Resend (e-mails) e cadastrar o domínio.
 - [ ] **[Você]** Colocar as chaves nas **variáveis secretas** do ambiente (nunca no chat nem no Git).
 - [ ] **[Eu]** Testar de verdade em sandbox: Pix, cartão aprovado/recusado, cotação de frete, webhook. **Feito:** Pix, cartão via API, cotação de frete e checkout completo com Pix. **Falta:** Brick de cartão no navegador (liberar `sdk.mercadopago.com` na rede do ambiente) e webhook (precisa de URL pública).
-- [ ] **[Eu]** Conferir a CSP com o formulário de cartão real (`next.config.ts`).
+- [x] **[Eu]** Conferir a CSP com o formulário de cartão real (`next.config.ts`). Feito em build de produção: o Brick carrega e não há bloqueios; foi preciso liberar `*.mercadolivre.com`. Os pedidos ao `www.mercadolibre.com` (identificação do dispositivo) falham só no ambiente de desenvolvimento, por bloqueio de rede.
+- [ ] **[Juntos]** Pagar com cartão de teste no Brick (APRO aprovado, OTHE recusado): as chaves atuais são `APP_USR-` da aba Produção e o Brick responde "no_payment_method_for_provided_bin" para cartões de teste. Falta ativar e usar as credenciais da aba **Teste**.
 - [ ] **[Juntos]** **Remover `MERCADO_PAGO_MODO_TESTE`** e trocar para as chaves de produção antes de abrir (com a variável ligada, nenhum pagamento real é cobrado).
 
 ## 2. Hospedagem e domínio (afeturar.com.br)

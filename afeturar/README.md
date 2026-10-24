@@ -190,7 +190,7 @@ Testes: `npm test` (113+ testes, incluindo regras de preço, catálogo público,
 Os provedores são escolhidos pelas variáveis: com token real usa-se Melhor Envio/Mercado Pago; com os flags de simulação, os simuladores.
 
 ### Limites conhecidos (ser transparente)
-- **Mercado Pago (Pix e cartão via API) e Melhor Envio (cotação) foram validados contra as APIs de teste/sandbox em 24/10/2026**, incluindo o checkout completo no navegador com Pix, cupom e frete grátis (por valor e por cupom), sem simulação. **Ainda falta** testar o formulário de cartão (Brick) no navegador — o ambiente de desenvolvimento bloqueia `sdk.mercadopago.com` — e o webhook (precisa de URL pública).
+- **Mercado Pago (Pix e cartão via API) e Melhor Envio (cotação) foram validados contra as APIs de teste/sandbox em 24/10/2026**, incluindo o checkout completo no navegador com Pix, cupom e frete grátis (por valor e por cupom), sem simulação. O Brick de cartão carrega em build de produção com a CSP corrigida, mas o pagamento com cartão de teste no navegador **ainda falta**: exige as credenciais da aba Teste. Também falta o webhook (precisa de URL pública).
 - Sem estorno automático; sem verificação de e-mail no cadastro; limite de tentativas em memória (por instância).
 - Frete exige dados de embalagem (peso/medidas) em cada produto e o CEP de origem em Configurações.
 - Teste de ponta a ponta no navegador (compra Pix/cartão, recusa, conta, recuperação, painel, celular) passou em modo simulado; os scripts não fazem parte do repositório.
