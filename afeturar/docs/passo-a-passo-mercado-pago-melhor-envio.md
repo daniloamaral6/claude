@@ -34,6 +34,8 @@ Os nomes de menus podem mudar; se algo não bater com a tela, siga o sentido e m
 
 **E-mail do comprador nos testes:** em modo de teste a API responde `400 Invalid users involved` (código 2034) se o e-mail do pagador não for de um usuário de teste. Use e-mails como `test_user_123456@testuser.com` no checkout durante os testes; compradores reais não têm essa restrição em produção.
 
+**Formulário de cartão no navegador (24/10/2026):** o teste mostrou que o formulário do Mercado Pago (Brick) usa, além do `sdk.mercadopago.com`, os endereços `secure-fields.mercadopago.com`, `api-static.mercadopago.com`, `www.mercadolibre.com` e `www.mercadolivre.com`. Nesta sessão de testes eles precisam estar liberados na rede do ambiente; a política de segurança do site (`next.config.ts`) já os aceita (inclusive `mercadolivre.com`, que a primeira versão esquecia).
+
 ### 1.4 Webhook (avisa a loja quando o pagamento muda)
 Só dá para configurar depois que o site estiver no ar (precisa de endereço público).
 1. Na aplicação: **Webhooks → Configurar notificações.**
