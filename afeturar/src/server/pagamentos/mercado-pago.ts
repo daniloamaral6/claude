@@ -3,7 +3,7 @@ import { ErroPagamento, PagamentoNaoEncontrado, type ConsultaPagamento, type Ped
 
 /**
  * Mercado Pago (API de Pagamentos /v1/payments).
- * ATENÇÃO: implementado conforme a documentação pública; ainda NÃO validado contra a API real (precisa do access token de teste).
+ * Validado contra a API de TESTE em 24/10/2026 (Pix e cartão); webhook e produção ainda não.
  * O cartão usa o token gerado no navegador pelo Mercado Pago (Brick): número/CVV nunca passam pelo nosso servidor.
  */
 const API = "https://api.mercadopago.com";
@@ -24,14 +24,19 @@ export function dataComFusoBrasil(d: Date): string {
   return `${br.toISOString().slice(0, 23)}-03:00`;
 }
 
-export function mercadoPago(opts: { accessToken: string; fetchImpl?: typeof fetch; timeoutMs?: number }): ProvedorPagamento {
+/**
+ * `modoTeste`: manda o cabeçalho `X-Test-Token: true`. Sem ele, as credenciais do painel do Mercado Pago recusam pagamentos
+ * de teste com "Unauthorized use of live credentials" (validado em 24/10/2026). Os pagamentos saem com live_mode=false (sem cobrança real).
+ * NUNCA ligue em produção: com ele, nenhum pagamento real é cobrado.
+ */
+export function mercadoPago(opts: { accessToken: string; modoTeste?: boolean; fetchImpl?: typeof fetch; timeoutMs?: number }): ProvedorPagamento {
   const f = opts.fetchImpl ?? fetch;
   async function chamar(caminho: string, init: { method: string; body?: unknown; idempotencia?: string }) {
     let r: Response;
     try {
       r = await f(`${API}${caminho}`, {
         method: init.method,
-        headers: { Authorization: `Bearer ${opts.accessToken}`, "Content-Type": "application/json", ...(init.idempotencia ? { "X-Idempotency-Key": init.idempotencia } : {}) },
+        headers: { Authorization: `Bearer ${opts.accessToken}`, "Content-Type": "application/json", ...(opts.modoTeste ? { "X-Test-Token": "true" } : {}), ...(init.idempotencia ? { "X-Idempotency-Key": init.idempotencia } : {}) },
         body: init.body ? JSON.stringify(init.body) : undefined, signal: AbortSignal.timeout(opts.timeoutMs ?? 15_000),
       });
     } catch {

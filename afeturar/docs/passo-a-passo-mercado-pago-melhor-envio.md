@@ -30,6 +30,8 @@ Os nomes de menus podem mudar; se algo não bater com a tela, siga o sentido e m
 3. Aviso: o token de teste começa com `APP_USR-`, igual ao de produção. Anote qual é qual para não trocar.
 4. Crie **contas de teste** (vendedor e comprador) na área de contas de teste; use a do comprador para pagar nos testes. Cartões de teste e as regras para aprovar/recusar estão na documentação do Mercado Pago (em geral o nome do titular `APRO` aprova e `OTHE` recusa) ⚠️ confirme os números atuais lá.
 
+**Resultado da validação (24/10/2026):** Pix (QR e copia-e-cola, consulta) e cartão (aprovado, recusado e saldo insuficiente) funcionam contra a API de teste. As chaves usadas pareciam ser as da **aba Produção**: a API recusou pagamentos de teste até enviarmos o cabeçalho de teste (`MERCADO_PAGO_MODO_TESTE=true`). O correto é usar as credenciais da **aba Teste**, depois de clicar em **Ativar credenciais** no cartão "Credenciais de teste". Com elas, essa variável não é necessária.
+
 ### 1.4 Webhook (avisa a loja quando o pagamento muda)
 Só dá para configurar depois que o site estiver no ar (precisa de endereço público).
 1. Na aplicação: **Webhooks → Configurar notificações.**

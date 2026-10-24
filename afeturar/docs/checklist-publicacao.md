@@ -10,6 +10,7 @@ Legenda: **[Você]** só você pode fazer · **[Eu]** posso fazer na sessão · 
 - [ ] **[Você]** Colocar as chaves nas **variáveis secretas** do ambiente (nunca no chat nem no Git).
 - [ ] **[Eu]** Testar de verdade em sandbox: Pix, cartão aprovado/recusado, cotação de frete, webhook. Corrigir o que as APIs reais mostrarem diferente (hoje só foi testado com respostas simuladas).
 - [ ] **[Eu]** Conferir a CSP com o formulário de cartão real (`next.config.ts`).
+- [ ] **[Juntos]** **Remover `MERCADO_PAGO_MODO_TESTE`** e trocar para as chaves de produção antes de abrir (com a variável ligada, nenhum pagamento real é cobrado).
 
 ## 2. Hospedagem e domínio (afeturar.com.br)
 - [ ] **[Você]** Escolher a hospedagem que aceita Next.js (Node) e PostgreSQL, e o plano. Há um conector da Hostinger nesta sessão, se for o caso.

@@ -115,6 +115,14 @@ describe("pagamento: Mercado Pago", () => {
     const rec = await mercadoPago({ accessToken: "T", fetchImpl: (async () => resposta({ id: 56, status: "rejected", status_detail: "cc_rejected_insufficient_amount" }, 201)) as unknown as typeof fetch }).criarCartao(pedido, { token: "t", metodoId: "visa", parcelas: 1 });
     expect(rec).toMatchObject({ status: "RECUSADO", detalhe: "cc_rejected_insufficient_amount" });
   });
+  it("modo de teste envia X-Test-Token; sem ele, o cabeçalho não existe", async () => {
+    const f = vi.fn(async () => resposta({ id: 1, status: "pending" }, 201));
+    await mercadoPago({ accessToken: "T", modoTeste: true, fetchImpl: f as unknown as typeof fetch }).criarPix(pedido, new Date("2026-10-10T15:30:00Z"));
+    await mercadoPago({ accessToken: "T", fetchImpl: f as unknown as typeof fetch }).criarPix(pedido, new Date("2026-10-10T15:30:00Z"));
+    const cab = (i: number) => (f.mock.calls[i] as unknown as [string, RequestInit])[1].headers as Record<string, string>;
+    expect(cab(0)["X-Test-Token"]).toBe("true");
+    expect(cab(1)["X-Test-Token"]).toBeUndefined();
+  });
   it("consulta o pagamento e valida o id; erros não vazam detalhes", async () => {
     const f = vi.fn(async () => resposta({ id: 99, status: "approved", transaction_amount: 12.5, currency_id: "BRL", external_reference: "ped9", payment_method_id: "pix" }));
     const mp = mercadoPago({ accessToken: "T", fetchImpl: f as unknown as typeof fetch });
