@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidarVitrine } from "@/server/cache";
 import { executar, type Estado } from "@/server/acao";
 import { exigirPainel } from "@/server/auth";
 import { atualizarCor, criarCor, excluirCor } from "@/server/cores";
@@ -13,7 +14,7 @@ export async function salvarCor(_: Estado, fd: FormData): Promise<Estado> {
   return executar(async () => {
     if (id) await atualizarCor(id, dados(fd), u.id);
     else await criarCor(dados(fd), u.id);
-    revalidatePath("/admin/cores");
+    revalidatePath("/admin/cores"); invalidarVitrine();
     return id ? "Cor salva." : "Cor criada.";
   });
 }
@@ -22,7 +23,7 @@ export async function removerCor(_: Estado, fd: FormData): Promise<Estado> {
   const u = await exigirPainel();
   return executar(async () => {
     await excluirCor(String(fd.get("id")), u.id);
-    revalidatePath("/admin/cores");
+    revalidatePath("/admin/cores"); invalidarVitrine();
     return "Cor excluída.";
   });
 }

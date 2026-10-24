@@ -29,8 +29,14 @@ Medido em produção local (banco local, portanto sem latência de rede):
 - Resposta do servidor 30–90 ms; LCP ≈ 200 ms; imagens servidas em WebP pelo otimizador do Next; 23 de 25 imagens da home com carregamento preguiçoso; índices do banco cobrem as consultas do catálogo.
 - **Corrigido:** cada página disparava de 31 a 49 pré-carregamentos (cada um renderiza uma página no servidor e consulta o banco). Desligados nos cartões de produto, rodapé, menus e blocos de categoria: **caiu para 10–15** por visita.
 
+**Cache da vitrine (feito em 24/10/2026)**
+- Os dados públicos (categorias, produtos, listas da home, cores do filtro, configurações do rodapé) ficam em cache por até 60 s. Em 30 visitas seguidas a home, a loja e um produto, o banco recebeu **2 transações** (antes, dezenas). Resposta da home ≈ 20 ms.
+- O cache é apagado **na hora** quando o painel salva produto, foto, categoria, cor, configuração ou pedido, e quando um pedido é criado, pago/cancelado pelo Mercado Pago ou expirado (estoque). Testado: alterei a cor de uma bolinha no painel e a loja já mostrou o novo tom na visita seguinte.
+- Não são guardados: resultado "não encontrado" (endereços inexistentes não enchem o cache), buscas digitadas, o carrinho e as páginas de pedido/conta. O preço e o estoque são sempre conferidos de novo no checkout.
+- As páginas continuam sendo montadas a cada visita (o cabeçalho mostra o carrinho de cada pessoa); o ganho está em não consultar o banco. Quando a loja tiver tráfego grande, o próximo passo é guardar também o HTML (exige tirar o carrinho do cabeçalho).
+- Com mais de um servidor, cada um tem seu próprio cache de 60 s; a invalidação instantânea vale no servidor que recebeu a alteração. Para vários servidores, usar um cache compartilhado (decisão de hospedagem).
+
 **A fazer depois**
-- **Todas as páginas são renderizadas a cada visita** (`Cache-Control: no-store`), porque o cabeçalho mostra a quantidade do carrinho. Com a loja no ar e o banco em outra máquina, vale tirar a contagem do carrinho do layout (buscar no navegador) e guardar em cache a home, as categorias e os produtos, invalidando quando o painel salvar. É a melhoria de maior efeito, mas é uma mudança maior.
 - O build avisa que a leitura de fotos do disco (`armazenamento.ts`) faz o Next rastrear o projeto inteiro. Inofensivo; vira problema ao trocar para armazenamento em nuvem (decisão de hospedagem).
 - Fotos da Shopee têm no máximo 1024 px; para telas grandes e zoom, usar os originais.
 

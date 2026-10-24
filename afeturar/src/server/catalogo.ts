@@ -2,6 +2,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { precoDaVariacao, prazoDaVariacao, quantidadeMaxima, variacaoCompravel, type TipoProduto } from "@/lib/preco";
 import { normalizarBusca } from "./busca";
+import { cacheado, cacheadoOuNulo } from "./cache";
 
 /** Leituras PÚBLICAS da loja. Só devolve produtos publicados em categorias ativas. */
 
@@ -50,14 +51,17 @@ export interface FiltrosCatalogo {
   ordem?: Ordem; pagina?: number; somenteDisponiveis?: boolean;
 }
 
-export async function categoriaPorSlug(slug: string) {
+async function categoriaPorSlugBase(slug: string) {
   return db.categoria.findFirst({
     where: { slug, ativa: true, OR: [{ paiId: null }, { pai: { ativa: true } }] },
     include: { pai: { select: { slug: true, nome: true } }, filhas: { where: { ativa: true }, orderBy: [{ ordem: "asc" }, { nome: "asc" }], select: { slug: true, nome: true } } },
   });
 }
 
-export async function listarCategoriasPublicas() {
+const categoriaPorSlugCache = cacheadoOuNulo(categoriaPorSlugBase, "vitrine-categoria");
+export const categoriaPorSlug = (slug: string) => categoriaPorSlugCache(slug);
+
+async function listarCategoriasPublicasBase() {
   return db.categoria.findMany({
     where: { ativa: true, paiId: null },
     orderBy: [{ ordem: "asc" }, { nome: "asc" }],
@@ -65,15 +69,19 @@ export async function listarCategoriasPublicas() {
   });
 }
 
+export const listarCategoriasPublicas = cacheado(listarCategoriasPublicasBase, "vitrine-categorias");
+
 /** Cores que existem em produtos publicados (para o filtro). */
-export async function coresDeProdutosPublicados() {
+async function coresDeProdutosPublicadosBase() {
   return db.cor.findMany({
     where: { ativa: true, variacoes: { some: { ativa: true, produto: visivel } } },
     orderBy: { nome: "asc" }, select: { slug: true, nome: true, hex: true },
   });
 }
 
-export async function listarProdutosPublicos(f: FiltrosCatalogo = {}) {
+export const coresDeProdutosPublicados = cacheado(coresDeProdutosPublicadosBase, "vitrine-cores");
+
+async function listarProdutosPublicosBase(f: FiltrosCatalogo = {}) {
   const and: Prisma.ProdutoWhereInput[] = [visivel];
   if (f.categoriaSlug) {
     const cat = await db.categoria.findUnique({ where: { slug: f.categoriaSlug }, select: { id: true, filhas: { select: { id: true } } } });
@@ -109,15 +117,19 @@ export async function listarProdutosPublicos(f: FiltrosCatalogo = {}) {
   return { itens: ids.map((id) => paraCartao(porId.get(id)!)), total, pagina, paginas };
 }
 
+// Busca digitada não é guardada (cada texto seria uma entrada nova); filtros e páginas da vitrine são.
+const listarProdutosPublicosCache = cacheado(listarProdutosPublicosBase, "vitrine-lista");
+export const listarProdutosPublicos = (f: FiltrosCatalogo = {}) => (f.busca?.trim() ? listarProdutosPublicosBase(f) : listarProdutosPublicosCache(f));
+
 async function cartoes(where: Prisma.ProdutoWhereInput, take: number, orderBy: Prisma.ProdutoOrderByWithRelationInput) {
   const ps = await db.produto.findMany({ where: { AND: [visivel, where] }, orderBy, take, include: incluirCartao });
   return ps.map(paraCartao);
 }
-export const novidades = (n = 10) => cartoes({}, n, { criadoEm: "desc" });
-export const destaques = (n = 10) => cartoes({ destaque: true }, n, { atualizadoEm: "desc" });
+export const novidades = cacheado(async (n: number = 10) => cartoes({}, n, { criadoEm: "desc" }), "vitrine-novidades");
+export const destaques = cacheado(async (n: number = 10) => cartoes({ destaque: true }, n, { atualizadoEm: "desc" }), "vitrine-destaques");
 
 /** Mais vendidos: soma de unidades de pedidos com pagamento aprovado em diante. Vazio enquanto não houver vendas. */
-export async function maisVendidos(n = 10) {
+async function maisVendidosBase(n = 10) {
   const linhas = await db.$queryRaw<{ produtoId: string; total: bigint }[]>`
     SELECT v."produtoId", SUM(i."quantidade")::bigint AS total
     FROM "ItemPedido" i
@@ -131,19 +143,19 @@ export async function maisVendidos(n = 10) {
   return ps.sort((a, b) => ordem.get(a.id)! - ordem.get(b.id)!).slice(0, n).map(paraCartao);
 }
 
+export const maisVendidos = cacheado(maisVendidosBase, "vitrine-mais-vendidos");
+
 export async function produtosPorSlugs(slugs: string[]) {
   if (!slugs.length) return [];
   const ps = await db.produto.findMany({ where: { AND: [visivel, { slug: { in: slugs.slice(0, 60) } }] }, include: incluirCartao });
   return ps.map(paraCartao);
 }
 
-export async function relacionados(produtoId: string, categoriaId: string, n = 4) {
-  return cartoes({ id: { not: produtoId }, categoriaId }, n, { atualizadoEm: "desc" });
-}
+export const relacionados = cacheado(async (produtoId: string, categoriaId: string, n: number = 4) => cartoes({ id: { not: produtoId }, categoriaId }, n, { atualizadoEm: "desc" }), "vitrine-relacionados");
 
 // ───────────── página de produto ─────────────
 
-export async function obterProdutoPublico(slug: string) {
+async function obterProdutoPublicoBase(slug: string) {
   const p = await db.produto.findFirst({
     where: { AND: [visivel, { slug }] },
     include: {
@@ -164,4 +176,7 @@ export async function obterProdutoPublico(slug: string) {
   });
   return { ...p, variacoes };
 }
-export type ProdutoPublico = NonNullable<Awaited<ReturnType<typeof obterProdutoPublico>>>;
+const obterProdutoPublicoCache = cacheadoOuNulo(obterProdutoPublicoBase, "vitrine-produto");
+/** Atenção: vindo do cache, campos de data chegam como texto (a página do produto não usa datas). */
+export const obterProdutoPublico = (slug: string) => obterProdutoPublicoCache(slug);
+export type ProdutoPublico = NonNullable<Awaited<ReturnType<typeof obterProdutoPublicoBase>>>;

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidarVitrine } from "@/server/cache";
 import { textoParaCentavos } from "@/lib/moeda";
 import { type Estado } from "@/server/acao";
 import { exigirPainel } from "@/server/auth";
@@ -29,6 +30,6 @@ export async function salvarConfig(_: Estado, fd: FormData): Promise<Estado> {
   };
   const r = await salvarConfiguracoes(entrada, u.id);
   if (!r.ok) return { erro: "Corrija os campos destacados.", erros: r.erros };
-  revalidatePath("/", "layout");
+  revalidatePath("/", "layout"); invalidarVitrine();
   return { ok: "Configurações salvas." };
 }

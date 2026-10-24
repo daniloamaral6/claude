@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidarVitrine } from "@/server/cache";
 import { redirect } from "next/navigation";
 import { executar, type Estado } from "@/server/acao";
 import { exigirPainel } from "@/server/auth";
@@ -21,7 +22,7 @@ export async function salvarProduto(_: Estado, fd: FormData): Promise<Estado> {
     } else {
       destino = `/admin/produtos/${(await criarProduto(entrada, u.id)).id}?criado=1`;
     }
-    revalidatePath("/admin/produtos");
+    revalidatePath("/admin/produtos"); invalidarVitrine();
   });
   // Redireciona para a própria página: o formulário é recriado com os dados salvos (variações novas já com id).
   if (destino) redirect(destino);
@@ -33,7 +34,7 @@ export async function excluirProduto(fd: FormData) {
   const id = String(fd.get("id"));
   if (fd.get("confirmo") !== "on") redirect(`/admin/produtos/${id}?erro=${encodeURIComponent("Marque a confirmação para excluir.")}`);
   const r = await removerProduto(id, u.id);
-  revalidatePath("/admin/produtos");
+  revalidatePath("/admin/produtos"); invalidarVitrine();
   redirect(r.excluido ? "/admin/produtos?excluido=1" : `/admin/produtos?despublicado=1`);
 }
 
@@ -44,7 +45,7 @@ async function comRetorno(produtoId: string, fn: () => Promise<void>) {
     if (e instanceof ErroNegocio) erro = e.message;
     else { console.error(e); erro = "Não foi possível concluir a operação."; }
   }
-  revalidatePath(`/admin/produtos/${produtoId}`);
+  revalidatePath(`/admin/produtos/${produtoId}`); invalidarVitrine();
   redirect(`/admin/produtos/${produtoId}${erro ? `?erro=${encodeURIComponent(erro)}` : ""}#fotos`);
 }
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidarVitrine } from "@/server/cache";
 import { executar, type Estado } from "@/server/acao";
 import { exigirPainel } from "@/server/auth";
 import { atualizarCategoria, criarCategoria, excluirCategoria } from "@/server/categorias";
@@ -21,7 +22,7 @@ export async function salvarCategoria(_: Estado, fd: FormData): Promise<Estado> 
   return executar(async () => {
     if (id) await atualizarCategoria(id, dados(fd), u.id);
     else await criarCategoria(dados(fd), u.id);
-    revalidatePath("/admin/categorias");
+    revalidatePath("/admin/categorias"); invalidarVitrine();
     return id ? "Categoria salva." : "Categoria criada.";
   });
 }
@@ -30,7 +31,7 @@ export async function removerCategoria(_: Estado, fd: FormData): Promise<Estado>
   const u = await exigirPainel();
   return executar(async () => {
     await excluirCategoria(String(fd.get("id")), u.id);
-    revalidatePath("/admin/categorias");
+    revalidatePath("/admin/categorias"); invalidarVitrine();
     return "Categoria excluída.";
   });
 }

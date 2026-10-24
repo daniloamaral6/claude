@@ -1,7 +1,8 @@
+import { cacheado } from "./cache";
 import { lerConfiguracoes } from "./configuracoes";
 
 /** Configurações exibidas na loja (rodapé, WhatsApp, avisos). Só o que foi preenchido no painel aparece. */
-export async function configuracoesPublicas() {
+async function configuracoesPublicasBase() {
   const c = await lerConfiguracoes();
   const s = (k: string) => (typeof c[k as keyof typeof c] === "string" && (c[k as keyof typeof c] as string).trim() ? (c[k as keyof typeof c] as string) : null);
   const gratis = c["frete.gratisAPartirDeCentavos"];
@@ -11,4 +12,5 @@ export async function configuracoesPublicas() {
     freteGratisCentavos: typeof gratis === "number" ? gratis : null,
   };
 }
+export const configuracoesPublicas = cacheado(configuracoesPublicasBase, "vitrine-config");
 export type ConfigPublica = Awaited<ReturnType<typeof configuracoesPublicas>>;

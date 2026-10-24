@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { invalidarVitrine } from "@/server/cache";
 import { processarNotificacaoPagamento } from "@/server/checkout";
 import { assinaturaWebhookValida } from "@/server/pagamentos/mercado-pago";
 
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
   }
   try {
     const r = await processarNotificacaoPagamento(idPagamento);
+    invalidarVitrine(); // pagamento recusado/cancelado devolve estoque
     await db.eventoWebhook.update({ where: { provedor_idEvento: { provedor: "MERCADO_PAGO", idEvento } }, data: { processadoEm: new Date(), erro: null } });
     return NextResponse.json({ ok: true, resultado: r });
   } catch (e) {

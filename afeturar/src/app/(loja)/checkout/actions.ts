@@ -5,6 +5,7 @@ import { cepValido, somenteDigitos } from "@/lib/validacoes";
 import { tokenDoCarrinho } from "@/server/carrinho-cookie";
 import { clienteAtual } from "@/server/auth-cliente";
 import { ErroNegocio } from "@/server/categorias";
+import { invalidarVitrine } from "@/server/cache";
 import { cotarCarrinho, criarPedido } from "@/server/checkout";
 import { errosDoZod } from "@/server/formularios";
 import { ipDoCliente, permitir } from "@/server/limite";
@@ -59,6 +60,7 @@ export async function finalizarPedido(payload: unknown) {
   return seguro(async () => {
     const cliente = await clienteAtual();
     const r = await criarPedido(payload as Parameters<typeof criarPedido>[0], await tokenDoCarrinho(), cliente?.id ?? null);
+    invalidarVitrine(); // o estoque mudou
     return { url: `/pedido/${r.numero}?c=${r.tokenAcesso}`, pago: r.pago };
   });
 }
