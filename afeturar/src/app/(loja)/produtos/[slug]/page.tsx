@@ -46,18 +46,22 @@ export default async function Produto({ params }: Props) {
   const disponivel = p.variacoes.some((v) => v.compravel);
   const base = { "@type": "Offer", priceCurrency: "BRL", availability: `https://schema.org/${disponivel ? "InStock" : "OutOfStock"}`, itemCondition: "https://schema.org/NewCondition", url };
   const jsonLd = {
-    "@context": "https://schema.org", "@type": "Product", name: p.nome, description: p.descricao ?? undefined, sku: p.variacoes[0]?.sku,
+    "@context": "https://schema.org", "@type": "Product", name: p.nome, description: p.descricao ? p.descricao.replace(/\s+/g, " ").trim() : undefined, sku: p.variacoes[0]?.sku,
     image: p.imagens.map((i) => absoluta(i.url)), brand: { "@type": "Brand", name: site.nome }, category: p.categoria.nome, material: p.material ?? undefined,
     offers: precos.length > 1 && Math.min(...precos) !== Math.max(...precos)
       ? { "@type": "AggregateOffer", priceCurrency: "BRL", lowPrice: (Math.min(...precos) / 100).toFixed(2), highPrice: (Math.max(...precos) / 100).toFixed(2), offerCount: precos.length, availability: base.availability }
       : { ...base, price: ((precos[0] ?? p.precoCentavos) / 100).toFixed(2) },
   };
 
+  const trilha = [{ nome: "Início", url: site.url }, ...(p.categoria.pai ? [{ nome: p.categoria.pai.nome, url: `${site.url}/categorias/${p.categoria.pai.slug}` }] : []), { nome: p.categoria.nome, url: `${site.url}/categorias/${p.categoria.slug}` }, { nome: p.nome, url }];
+  const breadcrumbLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: trilha.map((t, i) => ({ "@type": "ListItem", position: i + 1, name: t.nome, item: t.url })) };
+
   const medidas = [["Largura", p.larguraMm], ["Altura", p.alturaMm], ["Profundidade", p.profundidadeMm]].filter(([, v]) => v) as [string, number][];
 
   return (
     <div className="container-loja py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }} />
       <nav aria-label="Você está em" className="text-sm text-marrom-suave">
         <Link href="/" className="underline-offset-4 hover:underline">Início</Link>
         {p.categoria.pai && <span> <span aria-hidden>/</span> <Link href={`/categorias/${p.categoria.pai.slug}`} className="underline-offset-4 hover:underline">{p.categoria.pai.nome}</Link></span>}

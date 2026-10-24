@@ -12,6 +12,31 @@ const nextConfig: NextConfig = {
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
     ];
+    if (process.env.NODE_ENV === "production") {
+      // Só em produção (o modo de desenvolvimento do Next precisa de eval). Os domínios do Mercado Pago/ViaCEP são
+      // os necessários para o checkout; VALIDAR com o Brick de cartão real quando houver as chaves de teste.
+      const mp = "https://*.mercadopago.com https://*.mercadopago.com.br https://*.mercadolibre.com https://*.mlstatic.com";
+      seguranca.push(
+        { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+        {
+          key: "Content-Security-Policy",
+          value: [
+            "default-src 'self'",
+            `script-src 'self' 'unsafe-inline' ${mp}`,
+            "style-src 'self' 'unsafe-inline'",
+            `img-src 'self' data: blob: ${mp}`,
+            "font-src 'self' data:",
+            `connect-src 'self' https://viacep.com.br ${mp}`,
+            `frame-src ${mp}`,
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'",
+            "upgrade-insecure-requests",
+          ].join("; "),
+        },
+      );
+    }
     return [
       { source: "/:path*", headers: seguranca },
       { source: "/admin/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },

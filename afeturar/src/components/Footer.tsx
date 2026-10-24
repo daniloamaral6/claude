@@ -24,7 +24,7 @@ function Coluna({ titulo, itens }: { titulo: string; itens: { href: string; labe
       <h2 className="text-sm font-semibold">{titulo}</h2>
       <ul className="mt-3 space-y-1 text-sm">
         {itens.map((i) => (
-          <li key={i.href}><Link href={i.href} className="inline-flex min-h-9 items-center underline-offset-4 hover:text-terracota-escuro hover:underline">{i.label}</Link></li>
+          <li key={i.href}><Link prefetch={false} href={i.href} className="inline-flex min-h-9 items-center underline-offset-4 hover:text-terracota-escuro hover:underline">{i.label}</Link></li>
         ))}
       </ul>
     </div>

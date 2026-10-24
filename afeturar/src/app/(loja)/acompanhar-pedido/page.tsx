@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FormAcompanhar } from "../conta/Formularios";
 
-export const metadata: Metadata = { title: "Acompanhar pedido", alternates: { canonical: "/acompanhar-pedido" } };
+export const metadata: Metadata = { title: "Acompanhar pedido", robots: { index: false, follow: false } };
 
 export default function Acompanhar() {
   return (

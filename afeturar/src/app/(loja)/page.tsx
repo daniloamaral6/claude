@@ -37,11 +37,18 @@ function SecaoProdutos({ id, eyebrow, titulo, produtos, href, rotulo, fundo }: {
   );
 }
 
+// Dados estruturados da marca: só o que é fato (nome, endereço do site, logotipo e a busca do site). Contatos entram quando cadastrados.
+const marcaLd = [
+  { "@context": "https://schema.org", "@type": "Organization", name: site.nome, url: site.url, logo: `${site.url}/brand/logo-circular.webp`, slogan: site.slogan },
+  { "@context": "https://schema.org", "@type": "WebSite", name: site.nome, url: site.url, potentialAction: { "@type": "SearchAction", target: `${site.url}/busca?q={search_term_string}`, "query-input": "required name=search_term_string" } },
+];
+
 export default async function Home() {
   const [categorias, novos, destaque, vendidos] = await Promise.all([listarCategoriasPublicas(), novidades(10), destaques(10), maisVendidos(10)]);
   const temProdutos = novos.length > 0;
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(marcaLd).replace(/</g, "\\u003c") }} />
       <HeroSlider slides={slides} />
 
       {categorias.length > 0 && (
@@ -53,7 +60,7 @@ export default async function Home() {
           <ul className="relative mt-6 flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:none] lg:grid lg:grid-cols-4 lg:overflow-visible xl:grid-cols-7 [&::-webkit-scrollbar]:hidden">
             {categorias.map((c) => (
               <li key={c.slug} className="w-[40%] shrink-0 snap-start sm:w-[25%] lg:w-auto">
-                <Link href={`/categorias/${c.slug}`} className="group block overflow-hidden rounded-[var(--radius-card)] border border-linha bg-white">
+                <Link prefetch={false} href={`/categorias/${c.slug}`} className="group block overflow-hidden rounded-[var(--radius-card)] border border-linha bg-white">
                   <div className="relative aspect-[4/3] w-full bg-creme-profundo transition-colors group-hover:bg-linha">
                     {c.imagemUrl ? <Image src={c.imagemUrl} alt="" fill sizes="(min-width:1280px) 14vw, 40vw" className="object-cover" /> : <Image src="/brand/simbolo-transparente.webp" alt="" aria-hidden fill sizes="160px" className="object-contain p-[18%] opacity-25" />}
                   </div>
@@ -87,7 +94,7 @@ export default async function Home() {
               <div key={c.slug} className="rounded-[var(--radius-card)] bg-creme-profundo p-8">
                 <h3 className="font-serif text-2xl">{c.t}</h3>
                 <p className="mt-2 max-w-sm text-marrom-suave">{c.d}</p>
-                <Link href={`/categorias/${c.slug}`} className="btn btn-secondary mt-5">{c.b}</Link>
+                <Link prefetch={false} href={`/categorias/${c.slug}`} className="btn btn-secondary mt-5">{c.b}</Link>
               </div>
             ))}
           </div>

@@ -57,10 +57,10 @@ export function Header({ categorias, carrinhoQtd = 0 }: { categorias: CategoriaM
                       {categorias.length === 0 && <li className="px-3 py-2 text-sm text-marrom-suave">Em breve</li>}
                       {categorias.map((c) => (
                         <li key={c.slug}>
-                          <Link href={`/categorias/${c.slug}`} className="flex min-h-11 items-center rounded-lg px-3 text-sm hover:bg-creme-profundo" onClick={() => setCatAberto(false)}>{c.nome}</Link>
+                          <Link prefetch={false} href={`/categorias/${c.slug}`} className="flex min-h-11 items-center rounded-lg px-3 text-sm hover:bg-creme-profundo" onClick={() => setCatAberto(false)}>{c.nome}</Link>
                           {c.filhas.length > 0 && (
                             <ul className="mb-1 ml-4 border-l border-linha pl-2">
-                              {c.filhas.map((f) => <li key={f.slug}><Link href={`/categorias/${f.slug}`} className="flex min-h-9 items-center px-2 text-sm text-marrom-suave hover:text-terracota-escuro" onClick={() => setCatAberto(false)}>{f.nome}</Link></li>)}
+                              {c.filhas.map((f) => <li key={f.slug}><Link prefetch={false} href={`/categorias/${f.slug}`} className="flex min-h-9 items-center px-2 text-sm text-marrom-suave hover:text-terracota-escuro" onClick={() => setCatAberto(false)}>{f.nome}</Link></li>)}
                             </ul>
                           )}
                         </li>
@@ -106,8 +106,8 @@ export function Header({ categorias, carrinhoQtd = 0 }: { categorias: CategoriaM
                   <ul className="pb-2 pl-3">
                     {categorias.map((c) => (
                       <li key={c.slug}>
-                        <Link href={`/categorias/${c.slug}`} className="flex min-h-11 items-center text-sm" onClick={() => setMenuAberto(false)}>{c.nome}</Link>
-                        {c.filhas.map((f) => <Link key={f.slug} href={`/categorias/${f.slug}`} className="flex min-h-9 items-center pl-4 text-sm text-marrom-suave" onClick={() => setMenuAberto(false)}>{f.nome}</Link>)}
+                        <Link prefetch={false} href={`/categorias/${c.slug}`} className="flex min-h-11 items-center text-sm" onClick={() => setMenuAberto(false)}>{c.nome}</Link>
+                        {c.filhas.map((f) => <Link prefetch={false} key={f.slug} href={`/categorias/${f.slug}`} className="flex min-h-9 items-center pl-4 text-sm text-marrom-suave" onClick={() => setMenuAberto(false)}>{f.nome}</Link>)}
                       </li>
                     ))}
                   </ul>

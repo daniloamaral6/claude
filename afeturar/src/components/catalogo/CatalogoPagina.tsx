@@ -68,7 +68,7 @@ export async function CatalogoPagina({ titulo, basePath, searchParams, categoria
       {descricao && <p className="mt-2 max-w-2xl text-marrom-suave">{descricao}</p>}
       {subcategorias.length > 0 && (
         <ul className="mt-4 flex flex-wrap gap-2" aria-label="Subcategorias">
-          {subcategorias.map((s) => <li key={s.slug}><Link href={`/categorias/${s.slug}`} className="inline-flex min-h-11 items-center rounded-full border border-marrom px-4 text-sm hover:bg-creme-profundo">{s.nome}</Link></li>)}
+          {subcategorias.map((s) => <li key={s.slug}><Link prefetch={false} href={`/categorias/${s.slug}`} className="inline-flex min-h-11 items-center rounded-full border border-marrom px-4 text-sm hover:bg-creme-profundo">{s.nome}</Link></li>)}
         </ul>
       )}
 

@@ -8,7 +8,7 @@ import { fundoCor } from "@/lib/cor";
 export function ProdutoCard({ p, prioridade = false }: { p: CartaoProduto; prioridade?: boolean }) {
   return (
     <article className="group relative">
-      <Link href={`/produtos/${p.slug}`} className="block">
+      <Link prefetch={false} href={`/produtos/${p.slug}`} className="block">
         <FotoProduto url={p.imagemUrl} alt={p.imagemAlt} sizes="(min-width:1024px) 22vw, (min-width:640px) 33vw, 50vw" prioridade={prioridade} className="aspect-square w-full rounded-[var(--radius-card)]" />
         <h3 className="mt-3 text-sm font-medium group-hover:underline underline-offset-4">{p.nome}</h3>
         <div className="mt-1"><Preco centavos={p.precoCentavos} promocionalCentavos={p.promocionalCentavos} aPartirDe={p.aPartirDe} /></div>
